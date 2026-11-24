@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>拾光八音盒 · 18 音阶用车记忆乐谱</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
+
+    :root {
+      --brass-light: #f3d58d;
+      --brass-mid: #d4af37;
+      --brass-dark: #8c6a1c;
+      --wood-dark: #1d1512;
+      --wood-card: #271d18;
+      --paper-cream: #f7f1e3;
+      --paper-line: #dfd3ba;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+      background: radial-gradient(circle at 50% 15%, #2d211b 0%, #150f0c 100%);
+      color: #f4ece1;
+      min-height: 100vh;
+    }
+
+    .serif-title {
+      font-family: 'Noto Serif SC', Georgia, serif;
+    }
+
+    /* 复古黄铜拉丝质感 */
+    .brass-gradient {
+      background: linear-gradient(135deg, #f6e0a2 0%, #c99e32 45%, #8a6414 100%);
+    }
+
+    .brass-border {
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 236, 179, 0.15);
+    }
+
+    /* 虚拟羊皮纸带纹理 */
+    .paper-tape {
+      background-color: var(--paper-cream);
+      background-image: 
+        linear-gradient(to right, rgba(168, 144, 104, 0.16) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(168, 144, 104, 0.22) 1px, transparent 1px);
+    }
+
+    /* 音梳拨片发光动画 */
+    @keyframes combPluck {
+      0% { transform: scaleX(1); filter: brightness(1); }
+      25% { transform: scaleX(1.18) translateX(3px); filter: brightness(1.8); }
+      100% { transform: scaleX(1); filter: brightness(1); }
+    }
+
+    .comb-active {
+      animation: combPluck 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+      background: linear-gradient(90deg, #ffd875, #ffffff) !important;
+      box-shadow: 0 0 14px rgba(255, 215, 100, 0.95);
+    }
+
+    /* 自定义细滚动条 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(212, 175, 55, 0.35);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(212, 175, 55, 0.6);
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-amber-500/30 selection:text-amber-200">
+
+  <!-- 顶部标题与全局控制台 -->
+  <header class="border-b border-amber-500/20 bg-black/30 backdrop-blur-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl brass-gradient flex items-center justify-center shadow-lg text-stone-950 font-bold text-xl">
+          ♪
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="serif-title text-lg sm:text-xl font-bold tracking-wide text-amber-100">
+              拾光八音盒 · 18 音阶用车记忆乐谱
+            </h1>
+            <span class="hidden sm:inline-block text-[11px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-400/30">
+              关系沉淀资产原型
+            </span>
+          </div>
+          <p class="text-xs text-stone-400">
+            每一次旅途高频行为自动打孔谱曲，日积月累沉淀为车主专属声音记忆
+          </p>
+        </div>
+      </div>
+
+      <!-- 播放与全局操作 -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <!-- 发声模式切换：接连奏响 vs 同步和鸣 -->
+        <div class="flex items-center bg-stone-900/90 border border-amber-500/30 rounded-lg p-0.5 text-xs">
+          <button id="modeArpBtn" class="px-2.5 py-1.5 rounded-md font-medium transition bg-amber-500/25 text-amber-200 border border-amber-400/40" title="同一天完成的事件按音阶高低依次清脆弹奏">
+            🎵 接连奏响
+          </button>
+          <button id="modeChordBtn" class="px-2.5 py-1.5 rounded-md font-medium transition text-stone-400 hover:text-amber-200" title="同一天完成的事件在同一拍齐鸣和弦">
+            🎹 同步和鸣
+          </button>
+        </div>
+
+        <!-- 速度调节 -->
+        <div class="hidden md:flex items-center gap-2 bg-stone-900/90 border border-amber-500/25 rounded-lg px-2.5 py-1.5 text-xs text-stone-300">
+          <span>节奏</span>
+          <input id="tempoSlider" type="range" min="60" max="150" value="96" class="w-16 accent-amber-400 cursor-pointer" />
+          <span id="tempoVal" class="font-mono text-amber-300 w-12">96 BPM</span>
+        </div>
+
+        <!-- 播放完整累计乐曲 -->
+        <button id="playAllBtn" class="px-4 py-2 rounded-lg brass-gradient text-stone-950 font-bold text-xs sm:text-sm shadow-lg hover:brightness-110 active:scale-95 transition flex items-center gap-1.5 cursor-pointer">
+          <span id="playAllIcon">▶</span>
+          <span id="playAllText">播放累计乐谱</span>
+        </button>
+
+        <!-- 一键生成示例多日记忆 -->
+        <button id="seedDemoBtn" class="px-3 py-2 rounded-lg bg-stone-800/90 hover:bg-stone-700 text-amber-200 border border-amber-500/30 text-xs font-medium transition cursor-pointer" title="生成过去 7 天的示例出行打孔记录">
+          ✨ 生成7日示例曲
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主工作区 -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- 左侧：18 音阶映射规则 & 当天行为打卡台 (5列) -->
+    <section class="lg:col-span-5 bg-[#231915]/95 rounded-2xl brass-border flex flex-col overflow-hidden">
+      <div class="p-4 border-b border-amber-500/20 flex items-center justify-between bg-black/20">
+        <div>
+          <h2 class="font-bold text-amber-100 text-sm sm:text-base flex items-center gap-2">
+            <span>🎹 18 音阶行为映射与打卡</span>
+            <span id="activeDayBadge" class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono">Day 1</span>
+          </h2>
+          <p class="text-[11px] text-stone-400 mt-0.5">
+            可直接修改事件名称；勾选即在当前日期纸带上打孔并试听
+          </p>
+        </div>
+        <button id="resetEventsBtn" class="text-[11px] text-stone-400 hover:text-amber-300 underline underline-offset-2 cursor-pointer">
+          恢复默认事件
+        </button>
+      </div>
+
+      <!-- 表头 -->
+      <div class="grid grid-cols-12 px-4 py-2 text-[11px] font-semibold text-amber-300/80 bg-black/30 border-b border-amber-500/15">
+        <div class="col-span-2">音阶</div>
+        <div class="col-span-8">触发行为事件（点击可编辑）</div>
+        <div class="col-span-2 text-right">今日达成</div>
+      </div>
+
+      <!-- 18 音阶列表 -->
+      <div id="scaleListContainer" class="divide-y divide-amber-500/10 max-h-[600px] overflow-y-auto">
+        <!-- 由 JS 动态渲染 18 行 -->
+      </div>
+    </section>
+
+    <!-- 右侧：复古八音盒机械滚筒 + 累计羊皮纸打孔乐谱 (7列) -->
+    <section class="lg:col-span-7 flex flex-col gap-5">
+
+      <!-- 上半部分：八音盒可视化与实时记忆字幕 -->
+      <div class="bg-[#231915]/95 rounded-2xl brass-border p-4 sm:p-5 relative overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <h2 class="font-bold text-amber-100 text-sm sm:text-base">虚拟八音盒音梳与记忆纸带</h2>
+          </div>
+
+          <!-- 日期天数列管理 -->
+          <div class="flex items-center gap-1.5">
+            <button id="playCurrentDayBtn" class="px-2.5 py-1 rounded-md bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-400/30 text-xs transition cursor-pointer">
+              🔔 试听选中日
+            </button>
+            <button id="addDayBtn" class="px-2.5 py-1 rounded-md bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-400/30 text-xs font-medium transition cursor-pointer">
+              + 新增下一天
+            </button>
+            <button id="clearAllDaysBtn" class="px-2.5 py-1 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-400/25 text-xs transition cursor-pointer">
+              清空纸带
+            </button>
+          </div>
+        </div>
+
+        <!-- 实时演奏记忆字幕条 -->
+        <div id="memorySubtitleBox" class="mb-4 px-4 py-2.5 rounded-xl bg-black/45 border border-amber-500/25 flex items-center justify-between gap-3 min-h-[46px]">
+          <div class="flex items-center gap-2.5 overflow-hidden">
+            <span class="text-amber-400 text-base shrink-0">✦</span>
+            <p id="memorySubtitleText" class="text-xs sm:text-sm text-amber-100/90 truncate">
+              点击左侧行为打孔，或点击上方「播放累计乐谱」聆听专属用车旋律…
+            </p>
+          </div>
+          <span id="playingNoteBadge" class="shrink-0 font-mono text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 hidden">
+            C4
+          </span>
+        </div>
+
+        <!-- 核心八音盒机械 + 滚动穿孔纸带 -->
+        <div class="relative rounded-xl overflow-hidden border-2 border-amber-600/40 shadow-inner bg-[#17110e] flex">
+          
+          <!-- 左侧固定黄铜音梳 (18根金属音齿) -->
+          <div class="w-24 sm:w-28 shrink-0 bg-gradient-to-r from-[#2c2119] to-[#1e1611] border-r-2 border-amber-500/50 z-10 flex flex-col justify-between py-8 select-none shadow-xl">
+            <div class="px-2 text-[10px] text-amber-400/80 font-mono text-center border-b border-amber-500/20 pb-1 mb-1">
+              18音黄铜音梳
+            </div>
+            <div id="combTeethContainer" class="flex-1 flex flex-col justify-between px-1.5 gap-[3px]">
+              <!-- 18 根音梳齿由 JS 生成 -->
+            </div>
+          </div>
+
+          <!-- 右侧可横向滚动的羊皮纸穿孔乐谱 -->
+          <div id="tapeScrollViewport" class="flex-1 overflow-x-auto relative paper-tape" style="background-size: 64px 24px;">
+            <!-- 播放激光/黄铜读头线 -->
+            <div id="playheadLine" class="hidden absolute top-0 bottom-0 w-0.5 bg-amber-500 shadow-[0_0_12px_#f59e0b] z-20 pointer-events-none transition-all duration-75"></div>
+            
+            <!-- 纸带网格内容 -->
+            <div id="paperGridContainer" class="min-w-full inline-flex flex-col">
+              <!-- 顶部日期列头 + 18行孔位由 JS 动态渲染 -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部统计栏 -->
+        <div class="mt-4 pt-3 border-t border-amber-500/15 flex flex-wrap items-center justify-between gap-3 text-xs text-stone-400">
+          <div class="flex items-center gap-4">
+            <span>累计记录天数：<strong id="statDays" class="text-amber-200 font-mono">1</strong> 天</span>
+            <span>累计记忆孔洞：<strong id="statHoles" class="text-amber-200 font-mono">0</strong> 枚音符</span>
+            <span>当前选中：<strong id="statSelectedDay" class="text-amber-300 font-mono">Day 1</strong></span>
+          </div>
+          <div class="text-[11px] text-stone-400">
+            提示：点击纸带上的日期列头可切换当前编辑日期；直接点击纸带格子也可打孔/消孔
+          </div>
+        </div>
+      </div>
+
+      <!-- 下半部分：产品规划价值说明卡片（方便演示汇报时讲解） -->
+      <div class="bg-[#231915]/80 rounded-2xl border border-amber-500/20 p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <div class="bg-black/25 rounded-xl p-3 border border-amber-500/10">
+          <div class="text-amber-300 font-bold mb-1">① 行为即音符（无感采集）</div>
+          <p class="text-stone-400 leading-relaxed">
+            将暴雨行车、深夜归途、露营小憩、K歌高光等 18 类真实用车瞬间自动映射为音阶，无需用户手动编辑。
+          </p>
+        </div>
+        <div class="bg-black/25 rounded-xl p-3 border border-amber-500/10">
+          <div class="text-amber-300 font-bold mb-1">② 时间即乐章（长期沉淀）</div>
+          <p class="text-stone-400 leading-relaxed">
+            单日事件可「接连奏响」成灵动旋律，也可「同步和鸣」为温暖和弦；随用车天数累积生成专属年度乐谱。
+          </p>
+        </div>
+        <div class="bg-black/25 rounded-xl p-3 border border-amber-500/10">
+          <div class="text-amber-300 font-bold mb-1">③ 记忆可分享（关系资产）</div>
+          <p class="text-stone-400 leading-relaxed">
+            支持一键生成「用车声音明信片」与车载氛围灯联动回放，让车从冷冰冰的工具变成记得车主故事的伙伴。
+          </p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    // =========================================================================
+    // 1. 18 音阶与默认事件数据（严格对应规划表 C4 -> F6）
+    // =========================================================================
+    const DEFAULT_NOTES = [
+      { id: 1,  note: 'C4', freq: 261.63, event: '极端天气（暴雨/大雪/冰雹/极端高低温/台风…）' },
+      { id: 2,  note: 'D4', freq: 293.66, event: '深夜开车（0点-6点）' },
+      { id: 3,  note: 'E4', freq: 329.63, event: '使用小憩模式 > 30min' },
+      { id: 4,  note: 'F4', freq: 349.23, event: '长途自驾' },
+      { id: 5,  note: 'G4', freq: 392.00, event: '单曲循环超过 5 次' },
+      { id: 6,  note: 'A4', freq: 440.00, event: '看电影持续超过 1h' },
+      { id: 7,  note: 'B4', freq: 493.88, event: 'K 歌持续超过 30min' },
+      { id: 8,  note: 'C5', freq: 523.25, event: '和 EVA 对话超过 15 次' },
+      { id: 9,  note: 'D5', freq: 587.33, event: '多人乘车' },
+      { id: 10, note: 'E5', freq: 659.25, event: '露营模式' },
+      { id: 11, note: 'F5', freq: 698.46, event: '低电量充满电' },
+      { id: 12, note: 'G5', freq: 783.99, event: 'OTA 升级' },
+      { id: 13, note: 'A5', freq: 880.00, event: '达成舒适星光成就' },
+      { id: 14, note: 'B5', freq: 987.77, event: '达成娱乐星光成就' },
+      { id: 15, note: 'C6', freq: 1046.50, event: '达成出行星光成就' },
+      { id: 16, note: 'D6', freq: 1174.66, event: '达成用车星光成就' },
+      { id: 17, note: 'E6', freq: 1318.51, event: '达成 EVA 星光成就' },
+      { id: 18, note: 'F6', freq: 1396.91, event: '用户专属特殊日子（生日/提车纪念日）' }
+    ];
+
+    // 状态管理
+    let state = {
+      notes: JSON.parse(localStorage.getItem('mb_notes_v1')) || JSON.parse(JSON.stringify(DEFAULT_NOTES)),
+      // days: 数组，每项代表一天 { label: 'Day 1', dateStr: '11/24', completedIds: [1, 5, 8] }
+      days: JSON.parse(localStorage.getItem('mb_days_v1')) || [
+        { label: 'Day 1', dateStr: '今天', completedIds: [5, 8, 9] }
+      ],
+      selectedDayIndex: 0,
+      playMode: 'arpeggio', // 'arpeggio' (接连奏响) | 'chord' (同步和鸣)
+      bpm: 96,
+      isPlaying: false,
+      playTimers: []
+    };
+
+    function saveState() {
+      localStorage.setItem('mb_notes_v1', JSON.stringify(state.notes));
+      localStorage.setItem('mb_days_v1', JSON.stringify(state.days));
+    }
+
+    // =========================================================================
+    // 2. Web Audio API 复古八音盒物理音色合成器（清脆金属音梳 + 泛音共鸣）
+    // =========================================================================
+    class MusicBoxAudio {
+      constructor() {
+        this.ctx = null;
+      }
+
+      ensureCtx() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      pluck(freq, delaySec = 0, velocity = 0.85) {
+        this.ensureCtx();
+        const now = this.ctx.currentTime + delaySec;
+
+        // 主基频（正弦波模拟黄铜音梳主振动）
+        const oscMain = this.ctx.createOscillator();
+        oscMain.type = 'sine';
+        oscMain.frequency.setValueAtTime(freq, now);
+
+        // 八度泛音（模拟金属拨片敲击瞬间的清脆亮感）
+        const oscBell = this.ctx.createOscillator();
+        oscBell.type = 'triangle';
+        oscBell.frequency.setValueAtTime(freq * 2, now);
+
+        // 高频金属敲击瞬态 (Pluck transient)
+        const oscPing = this.ctx.createOscillator();
+        oscPing.type = 'sine';
+        oscPing.frequency.setValueAtTime(freq * 4.02, now);
+
+        // 主包络：极快起音 + 悠长自然衰减
+        const gainMain = this.ctx.createGain();
+        gainMain.gain.setValueAtTime(0.0001, now);
+        gainMain.gain.linearRampToValueAtTime(0.28 * velocity, now + 0.008);
+        gainMain.gain.exponentialRampToValueAtTime(0.0008, now + 1.45);
+
+        // 泛音包络
+        const gainBell = this.ctx.createGain();
+        gainBell.gain.setValueAtTime(0.0001, now);
+        gainBell.gain.linearRampToValueAtTime(0.09 * velocity, now + 0.005);
+        gainBell.gain.exponentialRampToValueAtTime(0.0005, now + 0.55);
+
+        // 金属拨片瞬态包络
+        const gainPing = this.ctx.createGain();
+        gainPing.gain.setValueAtTime(0.0001, now);
+        gainPing.gain.linearRampToValueAtTime(0.05 * velocity, now + 0.002);
+        gainPing.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+
+        oscMain.connect(gainMain);
+        oscBell.connect(gainBell);
+        oscPing.connect(gainPing);
+
+        gainMain.connect(this.ctx.destination);
+        gainBell.connect(this.ctx.destination);
+        gainPing.connect(this.ctx.destination);
+
+        oscMain.start(now);
+        oscBell.start(now);
+        oscPing.start(now);
+
+        oscMain.stop(now + 1.5);
+        oscBell.stop(now + 0.6);
+        oscPing.stop(now + 0.08);
+      }
+    }
+
+    const audioEngine = new MusicBoxAudio();
+
+    // =========================================================================
+    // 3. 视觉反馈：音梳拨片跳动 + 记忆字幕更新
+    // =========================================================================
+    function triggerVisualNote(noteObj, dayLabel = '') {
+      // 1. 音梳齿发光跳动
+      const tooth = document.getElementById(`comb-tooth-${noteObj.id}`);
+      if (tooth) {
+        tooth.classList.remove('comb-active');
+        void tooth.offsetWidth; // 强制重绘以重新触发动画
+        tooth.classList.add('comb-active');
+      }
+
+      // 2. 更新字幕条
+      const subText = document.getElementById('memorySubtitleText');
+      const badge = document.getElementById('playingNoteBadge');
+      if (subText && badge) {
+        const prefix = dayLabel ? `【${dayLabel}】` : '';
+        subText.textContent = `${prefix}${noteObj.event}`;
+        badge.textContent = `${noteObj.note} · ${Math.round(noteObj.freq)}Hz`;
+        badge.classList.remove('hidden');
+      }
+    }
+
+    // =========================================================================
+    // 4. 播放调度引擎（支持单日 / 多日累计，支持接连奏响 & 同步和鸣）
+    // =========================================================================
+    function stopPlayback() {
+      state.playTimers.forEach(t => clearTimeout(t));
+      state.playTimers = [];
+      state.isPlaying = false;
+
+      const btnIcon = document.getElementById('playAllIcon');
+      const btnText = document.getElementById('playAllText');
+      const playhead = document.getElementById('playheadLine');
+      if (btnIcon) btnIcon.textContent = '▶';
+      if (btnText) btnText.textContent = '播放累计乐谱';
+      if (playhead) playhead.classList.add('hidden');
+    }
+
+    // 播放指定天的音符集合
+    function scheduleDayNotes(dayObj, dayIdx, startTimeOffsetMs) {
+      const sortedIds = [...dayObj.completedIds].sort((a, b) => a - b);
+      const beatMs = (60 / state.bpm) * 1000;
+
+      // 移动读头指针到当前天
+      const tHead = setTimeout(() => {
+        highlightDayColumn(dayIdx);
+      }, startTimeOffsetMs);
+      state.playTimers.push(tHead);
+
+      if (sortedIds.length === 0) {
+        // 空天短暂停顿
+        return beatMs * 0.65;
+      }
+
+      if (state.playMode === 'chord') {
+        // 【同步和鸣模式】：当天所有事件在同一拍同时齐鸣
+        const tChord = setTimeout(() => {
+          const velocity = Math.min(1, 1.15 / Math.sqrt(sortedIds.length)); // 防止多音叠加过载
+          sortedIds.forEach(id => {
+            const noteObj = state.notes.find(n => n.id === id);
+            if (noteObj) {
+              audioEngine.pluck(noteObj.freq, 0, velocity);
+              triggerVisualNote(noteObj, dayObj.label);
+            }
+          });
+          // 如果有多个事件，字幕合并展示高光摘要
+          if (sortedIds.length > 1) {
+            const names = sortedIds.map(id => {
+              const n = state.notes.find(x => x.id === id);
+              return n ? n.event.split('（')[0] : '';
+            }).filter(Boolean);
+            document.getElementById('memorySubtitleText').textContent =
+              `【${dayObj.label} 和弦齐鸣】${names.join(' + ')}`;
+          }
+        }, startTimeOffsetMs);
+        state.playTimers.push(tChord);
+
+        return beatMs * 1.15;
+      } else {
+        // 【接连奏响模式】：当天事件按音阶高低依次清脆弹奏
+        const stepMs = Math.max(110, Math.min(220, beatMs * 0.36));
+        sortedIds.forEach((id, idx) => {
+          const noteObj = state.notes.find(n => n.id === id);
+          if (!noteObj) return;
+          const tNote = setTimeout(() => {
+            audioEngine.pluck(noteObj.freq, 0, 0.9);
+            triggerVisualNote(noteObj, dayObj.label);
+          }, startTimeOffsetMs + idx * stepMs);
+          state.playTimers.push(tNote);
+        });
+
+        return Math.max(beatMs, sortedIds.length * stepMs + 140);
+      }
+    }
+
+    function playAllDays() {
+      if (state.isPlaying) {
+        stopPlayback();
+        return;
+      }
+      audioEngine.ensureCtx();
+      state.isPlaying = true;
+      document.getElementById('playAllIcon').textContent = '⏹';
+      document.getElementById('playAllText').textContent = '停止播放';
+
+      let cursorMs = 50;
+      state.days.forEach((day, idx) => {
+        const duration = scheduleDayNotes(day, idx, cursorMs);
+        cursorMs += duration;
+      });
+
+      const tEnd = setTimeout(() => {
+        stopPlayback();
+        document.getElementById('memorySubtitleText').textContent =
+          `✨ 完整 ${state.days.length} 日记忆乐章演奏完毕，共奏响 ${countTotalHoles()} 枚音符。`;
+      }, cursorMs + 300);
+      state.playTimers.push(tEnd);
+    }
+
+    function playSingleDay(dayIdx) {
+      stopPlayback();
+      audioEngine.ensureCtx();
+      const day = state.days[dayIdx];
+      if (!day) return;
+      if (day.completedIds.length === 0) {
+        document.getElementById('memorySubtitleText').textContent =
+          `【${day.label}】暂无打孔记录，请先在左侧勾选当天完成的事件。`;
+        return;
+      }
+      scheduleDayNotes(day, dayIdx, 20);
+      const tClean = setTimeout(() => {
+        const playhead = document.getElementById('playheadLine');
+        if (playhead) playhead.classList.add('hidden');
+      }, 1200);
+      state.playTimers.push(tClean);
+    }
+
+    function highlightDayColumn(dayIdx) {
+      const colEl = document.getElementById(`day-col-header-${dayIdx}`);
+      const playhead = document.getElementById('playheadLine');
+      const viewport = document.getElementById('tapeScrollViewport');
+      if (colEl && playhead && viewport) {
+        const leftPos = colEl.offsetLeft + colEl.offsetWidth / 2;
+        playhead.style.left = `${leftPos}px`;
+        playhead.classList.remove('hidden');
+
+        // 自动平滑滚动跟随
+        const targetScroll = leftPos - viewport.clientWidth / 2;
+        viewport.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+      }
+    }
+
+    // =========================================================================
+    // 5. 渲染界面：左侧 18 音阶控制列表 + 右侧音梳与穿孔纸带
+    // =========================================================================
+    function countTotalHoles() {
+      return state.days.reduce((sum, d) => sum + d.completedIds.length, 0);
+    }
+
+    function renderAll() {
+      renderLeftScaleList();
+      renderCombTeeth();
+      renderPaperTape();
+      updateStats();
+    }
+
+    function renderLeftScaleList() {
+      const container = document.getElementById('scaleListContainer');
+      const currentDay = state.days[state.selectedDayIndex] || state.days[0];
+      document.getElementById('activeDayBadge').textContent = currentDay.label;
+
+      container.innerHTML = '';
+      state.notes.forEach(item => {
+        const isChecked = currentDay.completedIds.includes(item.id);
+
+        const row = document.createElement('div');
+        row.className = `grid grid-cols-12 items-center px-4 py-2.5 transition ${
+          isChecked ? 'bg-amber-500/15' : 'hover:bg-white/[0.03]'
+        }`;
+
+        // 1. 音阶徽章（点击可单独试听该音符）
+        const colNote = document.createElement('div');
+        colNote.className = 'col-span-2 flex items-center gap-1.5';
+        const noteBtn = document.createElement('button');
+        noteBtn.className = `px-2 py-0.5 rounded font-mono text-xs font-bold border transition cursor-pointer ${
+          isChecked
+            ? 'brass-gradient text-stone-950 border-amber-300 shadow'
+            : 'bg-stone-800 text-amber-300 border-amber-500/30 hover:border-amber-400'
+        }`;
+        noteBtn.textContent = item.note;
+        noteBtn.title = `点击试听 ${item.note}`;
+        noteBtn.onclick = () => {
+          audioEngine.pluck(item.freq);
+          triggerVisualNote(item);
+        };
+        colNote.appendChild(noteBtn);
+
+        // 2. 可编辑事件输入框
+        const colEvent = document.createElement('div');
+        colEvent.className = 'col-span-8 pr-2';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = item.event;
+        input.className = `w-full bg-transparent text-xs sm:text-[13px] px-2 py-1 rounded border border-transparent hover:border-amber-500/30 focus:border-amber-400 focus:bg-black/40 focus:outline-none transition ${
+          isChecked ? 'text-amber-100 font-medium' : 'text-stone-300'
+        }`;
+        input.onchange = (e) => {
+          const val = e.target.value.trim();
+          if (val) {
+            item.event = val;
+            saveState();
+          } else {
+            e.target.value = item.event;
+          }
+        };
+        colEvent.appendChild(input);
+
+        // 3. 今日达成打孔复选框
+        const colCheck = document.createElement('div');
+        colCheck.className = 'col-span-2 flex justify-end';
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = `w-7 h-7 rounded-full flex items-center justify-center border transition cursor-pointer ${
+          isChecked
+            ? 'bg-amber-400 border-amber-200 text-stone-950 font-bold shadow-[0_0_10px_rgba(251,191,36,0.5)]'
+            : 'bg-stone-900/80 border-stone-600 text-transparent hover:border-amber-400/60'
+        }`;
+        toggleBtn.innerHTML = '●';
+        toggleBtn.title = isChecked ? '取消今日打孔' : '打卡并打孔';
+        toggleBtn.onclick = () => {
+          toggleHole(state.selectedDayIndex, item.id);
+        };
+        colCheck.appendChild(toggleBtn);
+
+        row.appendChild(colNote);
+        row.appendChild(colEvent);
+        row.appendChild(colCheck);
+        container.appendChild(row);
+      });
+    }
+
+    function renderCombTeeth() {
+      const container = document.getElementById('combTeethContainer');
+      container.innerHTML = '';
+      // 音梳从高音到低音或按 1-18 对应右侧行
+      state.notes.forEach((item, idx) => {
+        const toothWrap = document.createElement('div');
+        toothWrap.className = 'flex items-center justify-between h-[22px] gap-1';
+
+        const label = document.createElement('span');
+        label.className = 'text-[10px] font-mono text-amber-300/70 w-6 text-right';
+        label.textContent = item.note;
+
+        // 音梳金属齿长度随音高渐变（低音长、高音短，还原真实八音盒物理结构）
+        const widthPercent = 92 - idx * 2.2;
+        const tooth = document.createElement('div');
+        tooth.id = `comb-tooth-${item.id}`;
+        tooth.style.width = `${widthPercent}%`;
+        tooth.className = 'h-2.5 rounded-r-full bg-gradient-to-r from-amber-700 via-amber-400 to-amber-200 transition-all cursor-pointer';
+        tooth.title = `${item.note}: ${item.event}`;
+        tooth.onclick = () => {
+          audioEngine.pluck(item.freq);
+          triggerVisualNote(item);
+        };
+
+        toothWrap.appendChild(label);
+        toothWrap.appendChild(tooth);
+        container.appendChild(toothWrap);
+      });
+    }
+
+    function renderPaperTape() {
+      const grid = document.getElementById('paperGridContainer');
+      grid.innerHTML = '';
+
+      // 顶部：日期列头行
+      const headerRow = document.createElement('div');
+      headerRow.className = 'flex border-b-2 border-amber-900/25 bg-[#ede2cb] sticky top-0 z-10';
+
+      state.days.forEach((day, dIdx) => {
+        const isSelected = dIdx === state.selectedDayIndex;
+        const cell = document.createElement('div');
+        cell.id = `day-col-header-${dIdx}`;
+        cell.className = `w-16 shrink-0 py-1.5 px-1 text-center border-r border-amber-900/15 cursor-pointer transition select-none ${
+          isSelected
+            ? 'bg-amber-500/30 text-stone-950 font-bold shadow-inner'
+            : 'text-stone-700 hover:bg-amber-500/15'
+        }`;
+        cell.innerHTML = `
+          <div class="text-[11px] leading-tight">${day.label}</div>
+          <div class="text-[9px] opacity-70 font-mono">${day.completedIds.length}孔</div>
+        `;
+        cell.onclick = () => {
+          state.selectedDayIndex = dIdx;
+          renderAll();
+        };
+        headerRow.appendChild(cell);
+      });
+      grid.appendChild(headerRow);
+
+      // 主体：18 行音阶轨道
+      const tracksWrap = document.createElement('div');
+      tracksWrap.className = 'py-1.5 flex flex-col justify-between gap-[3px]';
+
+      state.notes.forEach(noteItem => {
+        const trackRow = document.createElement('div');
+        trackRow.className = 'flex items-center h-[22px] border-b border-dashed border-amber-900/15';
+
+        state.days.forEach((day, dIdx) => {
+          const isPunched = day.completedIds.includes(noteItem.id);
+          const isSelectedDay = dIdx === state.selectedDayIndex;
+
+          const cell = document.createElement('div');
+          cell.className = `w-16 shrink-0 h-full flex items-center justify-center border-r border-amber-900/10 cursor-pointer transition ${
+            isSelectedDay ? 'bg-amber-400/10' : ''
+          }`;
+          cell.title = `${day.label} · ${noteItem.note}（${noteItem.event}）`;
+          cell.onclick = () => {
+            state.selectedDayIndex = dIdx;
+            toggleHole(dIdx, noteItem.id);
+          };
+
+          // 穿孔圆点（真实纸带打孔质感：深色圆孔 + 内阴影 + 金边）
+          const hole = document.createElement('div');
+          if (isPunched) {
+            hole.className = 'w-3.5 h-3.5 rounded-full bg-[#241914] border-2 border-amber-600 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9),0_0_6px_rgba(217,119,6,0.45)] scale-100 transition-transform';
+          } else {
+            hole.className = 'w-1.5 h-1.5 rounded-full bg-amber-900/20 hover:scale-150 hover:bg-amber-600/50 transition-all';
+          }
+
+          cell.appendChild(hole);
+          trackRow.appendChild(cell);
+        });
+
+        tracksWrap.appendChild(trackRow);
+      });
+
+      grid.appendChild(tracksWrap);
+    }
+
+    function toggleHole(dayIdx, noteId) {
+      const day = state.days[dayIdx];
+      if (!day) return;
+
+      const existsIdx = day.completedIds.indexOf(noteId);
+      const noteObj = state.notes.find(n => n.id === noteId);
+
+      if (existsIdx > -1) {
+        day.completedIds.splice(existsIdx, 1);
+      } else {
+        day.completedIds.push(noteId);
+        // 打孔瞬间奏响对应清脆音符
+        if (noteObj) {
+          audioEngine.pluck(noteObj.freq);
+          triggerVisualNote(noteObj, day.label);
+        }
+      }
+
+      saveState();
+      renderAll();
+    }
+
+    function updateStats() {
+      document.getElementById('statDays').textContent = state.days.length;
+      document.getElementById('statHoles').textContent = countTotalHoles();
+      const cur = state.days[state.selectedDayIndex];
+      document.getElementById('statSelectedDay').textContent = cur ? cur.label : 'Day 1';
+    }
+
+    // =========================================================================
+    // 6. 交互按钮事件绑定
+    // =========================================================================
+    document.getElementById('modeArpBtn').onclick = () => {
+      state.playMode = 'arpeggio';
+      document.getElementById('modeArpBtn').className =
+        'px-2.5 py-1.5 rounded-md font-medium transition bg-amber-500/25 text-amber-200 border border-amber-400/40';
+      document.getElementById('modeChordBtn').className =
+        'px-2.5 py-1.5 rounded-md font-medium transition text-stone-400 hover:text-amber-200';
+    };
+
+    document.getElementById('modeChordBtn').onclick = () => {
+      state.playMode = 'chord';
+      document.getElementById('modeChordBtn').className =
+        'px-2.5 py-1.5 rounded-md font-medium transition bg-amber-500/25 text-amber-200 border border-amber-400/40';
+      document.getElementById('modeArpBtn').className =
+        'px-2.5 py-1.5 rounded-md font-medium transition text-stone-400 hover:text-amber-200';
+    };
+
+    document.getElementById('tempoSlider').oninput = (e) => {
+      state.bpm = Number(e.target.value);
+      document.getElementById('tempoVal').textContent = `${state.bpm} BPM`;
+    };
+
+    document.getElementById('playAllBtn').onclick = playAllDays;
+
+    document.getElementById('playCurrentDayBtn').onclick = () => {
+      playSingleDay(state.selectedDayIndex);
+    };
+
+    document.getElementById('addDayBtn').onclick = () => {
+      stopPlayback();
+      const nextNum = state.days.length + 1;
+      state.days.push({
+        label: `Day ${nextNum}`,
+        dateStr: `第${nextNum}天`,
+        completedIds: []
+      });
+      state.selectedDayIndex = state.days.length - 1;
+      saveState();
+      renderAll();
+
+      // 自动滚动到最右侧新的一天
+      const viewport = document.getElementById('tapeScrollViewport');
+      viewport.scrollTo({ left: viewport.scrollWidth, behavior: 'smooth' });
+    };
+
+    document.getElementById('clearAllDaysBtn').onclick = () => {
+      stopPlayback();
+      state.days = [{ label: 'Day 1', dateStr: '今天', completedIds: [] }];
+      state.selectedDayIndex = 0;
+      saveState();
+      renderAll();
+      document.getElementById('memorySubtitleText').textContent = '纸带已重置为全新空白卷轴，开始记录你的第一天吧。';
+      document.getElementById('playingNoteBadge').classList.add('hidden');
+    };
+
+    document.getElementById('resetEventsBtn').onclick = () => {
+      state.notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
+      saveState();
+      renderAll();
+    };
+
+    // 生成富有情感故事感的 7 日用车示例乐谱（含《小星星》/《卡农》般悦耳的五声音阶进行）
+    document.getElementById('seedDemoBtn').onclick = () => {
+      stopPlayback();
+      state.days = [
+        { label: 'Day 1', dateStr: '周六提车', completedIds: [1, 8, 18] },     // C4 + C5 + F6 (特殊纪念日)
+        { label: 'Day 2', dateStr: '晴日兜风', completedIds: [5, 9, 12] },     // G4 + D5 + G5
+        { label: 'Day 3', dateStr: '午间小憩', completedIds: [3, 6, 13] },     // E4 + A4 + A5
+        { label: 'Day 4', dateStr: '夜归听歌', completedIds: [2, 5, 10] },     // D4 + G4 + E5
+        { label: 'Day 5', dateStr: '露营欢唱', completedIds: [4, 7, 10, 14] }, // F4 + B4 + E5 + B5
+        { label: 'Day 6', dateStr: '长途自驾', completedIds: [4, 6, 8, 15] },  // F4 + A4 + C5 + C6
+        { label: 'Day 7', dateStr: '满电出发', completedIds: [8, 10, 12, 17] } // C5 + E5 + G5 + E6
+      ];
+      state.selectedDayIndex = 0;
+      saveState();
+      renderAll();
+      playAllDays();
+    };
+
+    // 初始化渲染
+    renderAll();
+  </script>
+</body>
+</html>
