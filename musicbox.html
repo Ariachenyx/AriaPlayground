@@ -42,7 +42,7 @@
       position: sticky;
       top: 0;
       z-index: 30;
-      background: rgba(255, 253, 249, 0.88);
+      background: rgba(255, 253, 249, 0.92);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border-soft);
     }
@@ -400,3 +400,1135 @@
     .right-col {
       display: flex;
       flex-direction: column;
+      gap: 20px;
+    }
+
+    .box-body {
+      padding: 20px;
+    }
+
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .mini-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .mini-btn {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 11px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid var(--border-soft);
+      background: #ffffff;
+      color: var(--text-main);
+      transition: all 0.15s ease;
+    }
+
+    .mini-btn:hover {
+      background: var(--bg-subtle);
+    }
+
+    .mini-btn.green {
+      background: #eef8f2;
+      border-color: #bfe3cd;
+      color: #236e43;
+    }
+
+    .mini-btn.green:hover {
+      background: #e1f3e8;
+    }
+
+    .mini-btn.red {
+      background: #fdf2f2;
+      border-color: #f3cece;
+      color: #b43c3c;
+    }
+
+    .mini-btn.red:hover {
+      background: #fbe6e6;
+    }
+
+    /* 实时记忆字幕条 */
+    .subtitle-bar {
+      background: #faf6ee;
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 11px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 46px;
+    }
+
+    .subtitle-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .spark-icon {
+      color: var(--gold-primary);
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .subtitle-text {
+      font-size: 13px;
+      color: var(--text-main);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .freq-badge {
+      flex-shrink: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--gold-deep);
+      border: 1px solid var(--border-gold);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* 浅色八音盒机械 + 穿孔纸带 */
+    .musicbox-stage {
+      display: flex;
+      border: 1.5px solid var(--border-gold);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--paper-bg);
+      box-shadow: inset 0 2px 8px rgba(130, 100, 50, 0.06);
+    }
+
+    .comb-panel {
+      width: 104px;
+      flex-shrink: 0;
+      background: linear-gradient(180deg, #f5efe3 0%, #ebe1cf 100%);
+      border-right: 2px solid #d5b87c;
+      padding: 6px 8px 10px 8px;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      z-index: 5;
+    }
+
+    .comb-header {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gold-deep);
+      text-align: center;
+      padding: 6px 0 8px 0;
+      border-bottom: 1px solid #dccaa7;
+      margin-bottom: 6px;
+    }
+
+    .comb-teeth-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .comb-row {
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .comb-note {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-sub);
+      width: 24px;
+      text-align: right;
+    }
+
+    .comb-tooth {
+      height: 10px;
+      border-radius: 0 999px 999px 0;
+      background: linear-gradient(90deg, #c69232 0%, #e7be6b 65%, #f7dfa6 100%);
+      box-shadow: 0 1px 2px rgba(120, 85, 25, 0.25);
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    @keyframes combPluckLight {
+      0% { transform: scaleX(1); filter: brightness(1); }
+      30% { transform: scaleX(1.16) translateX(3px); filter: brightness(1.3); }
+      100% { transform: scaleX(1); filter: brightness(1); }
+    }
+
+    .comb-active {
+      animation: combPluckLight 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      background: linear-gradient(90deg, #b87914 0%, #ffcf5c 100%) !important;
+      box-shadow: 0 0 10px rgba(224, 159, 43, 0.75) !important;
+    }
+
+    /* 纸带滚动区 */
+    .tape-viewport {
+      flex: 1;
+      overflow-x: auto;
+      position: relative;
+      background-color: var(--paper-bg);
+      background-image: linear-gradient(to right, rgba(214, 198, 170, 0.25) 1px, transparent 1px);
+      background-size: 66px 100%;
+    }
+
+    .playhead-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #d98a1c;
+      box-shadow: 0 0 10px rgba(217, 138, 28, 0.65);
+      z-index: 20;
+      pointer-events: none;
+      transition: left 0.08s linear;
+    }
+
+    .paper-grid {
+      display: inline-flex;
+      flex-direction: column;
+      min-width: 100%;
+    }
+
+    .paper-header-row {
+      display: flex;
+      background: #f5efe4;
+      border-bottom: 1.5px solid #dfd2bc;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .day-col-head {
+      width: 66px;
+      flex-shrink: 0;
+      padding: 6px 4px;
+      text-align: center;
+      border-right: 1px solid #e6dbc8;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+
+    .day-col-head:hover {
+      background: #efe5d3;
+    }
+
+    .day-col-head.selected {
+      background: #f9ebd0;
+      color: var(--gold-deep);
+      font-weight: 700;
+    }
+
+    .day-col-title {
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .day-col-count {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .paper-tracks {
+      padding: 6px 0 10px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .track-row {
+      display: flex;
+      height: 22px;
+      align-items: center;
+      border-bottom: 1px dashed #ece3d3;
+    }
+
+    .track-cell {
+      width: 66px;
+      height: 100%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid #f0e8da;
+      cursor: pointer;
+      transition: background 0.12s ease;
+    }
+
+    .track-cell.selected-col {
+      background: rgba(235, 194, 117, 0.12);
+    }
+
+    .track-cell:hover {
+      background: rgba(217, 155, 46, 0.15);
+    }
+
+    .hole-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #dfd4c0;
+      transition: all 0.15s ease;
+    }
+
+    .track-cell:hover .hole-dot {
+      transform: scale(1.4);
+      background: #c89d4c;
+    }
+
+    .hole-punched {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #5c462c 0%, #2c2013 100%);
+      border: 2px solid #dfa944;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.55), 0 1px 4px rgba(217, 155, 46, 0.35);
+    }
+
+    /* 底部统计 */
+    .stats-bar {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-soft);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .stats-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .stats-group strong {
+      color: var(--gold-deep);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    /* 底部三栏说明卡 */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-card {
+      background: #ffffff;
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 10px rgba(92, 68, 32, 0.04);
+    }
+
+    .info-card h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold-deep);
+      margin-bottom: 5px;
+    }
+
+    .info-card p {
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部导航与全局控制 -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-icon">♪</div>
+        <div>
+          <div class="brand-title-row">
+            <h1 class="brand-title">拾光八音盒 · 18 音阶用车记忆乐谱</h1>
+            <span class="badge-tag">五声音阶水晶调律</span>
+          </div>
+          <p class="brand-sub">每一次旅途行为自动在纸带上打孔谱曲，日积月累沉淀为车主专属声音资产</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="segmented">
+          <button id="modeArpBtn" class="seg-btn active" title="同一天完成的事件按音阶高低依次清脆弹奏">🎵 接连奏响</button>
+          <button id="modeChordBtn" class="seg-btn" title="智能优选最协和的 3 个音以 52ms 微扫弦温柔和鸣">🎹 协和扫弦</button>
+        </div>
+
+        <div class="tempo-box">
+          <span>节奏</span>
+          <input id="tempoSlider" type="range" min="60" max="135" value="84" />
+          <span id="tempoVal" class="tempo-val">84 BPM</span>
+        </div>
+
+        <button id="playAllBtn" class="btn-primary">
+          <span id="playAllIcon">▶</span>
+          <span id="playAllText">播放累计乐谱</span>
+        </button>
+
+        <button id="seedDemoBtn" class="btn-secondary" title="生成过去 7 天的示例出行打孔记录">
+          ✨ 生成7日示例曲
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主工作区 -->
+  <main class="main-grid">
+
+    <!-- 左侧：18 音阶行为映射表 -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <span>🎹 18 音阶行为映射与打卡</span>
+            <span id="activeDayBadge" class="day-pill">Day 1</span>
+          </div>
+          <p class="card-desc">点击音阶徽章可试听水晶音梳；事件名称可直接点击修改</p>
+        </div>
+        <button id="resetEventsBtn" class="link-btn">恢复默认事件</button>
+      </div>
+
+      <div class="table-head">
+        <div>音阶</div>
+        <div>触发行为事件（可编辑）</div>
+        <div style="text-align: right;">今日达成</div>
+      </div>
+
+      <div id="scaleListContainer" class="scale-list"></div>
+    </section>
+
+    <!-- 右侧：八音盒音梳与记忆纸带 -->
+    <section class="right-col">
+      <div class="card">
+        <div class="box-body">
+          <div class="toolbar-row">
+            <div class="card-title">
+              <span>🎼 虚拟八音盒音梳与记忆纸带</span>
+            </div>
+            <div class="mini-btns">
+              <button id="playCurrentDayBtn" class="mini-btn">🔔 试听选中日</button>
+              <button id="addDayBtn" class="mini-btn green">+ 新增下一天</button>
+              <button id="clearAllDaysBtn" class="mini-btn red">清空纸带</button>
+            </div>
+          </div>
+
+          <!-- 实时记忆字幕条 -->
+          <div class="subtitle-bar">
+            <div class="subtitle-left">
+              <span class="spark-icon">✦</span>
+              <p id="memorySubtitleText" class="subtitle-text">
+                点击左侧行为打孔，或点击右上角「生成7日示例曲」聆听专属八音盒旋律…
+              </p>
+            </div>
+            <span id="playingNoteBadge" class="freq-badge hidden">C5</span>
+          </div>
+
+          <!-- 八音盒机械与纸带 -->
+          <div class="musicbox-stage">
+            <div class="comb-panel">
+              <div class="comb-header">18音水晶音梳</div>
+              <div id="combTeethContainer" class="comb-teeth-list"></div>
+            </div>
+
+            <div id="tapeScrollViewport" class="tape-viewport">
+              <div id="playheadLine" class="playhead-line hidden"></div>
+              <div id="paperGridContainer" class="paper-grid"></div>
+            </div>
+          </div>
+
+          <!-- 底部统计 -->
+          <div class="stats-bar">
+            <div class="stats-group">
+              <span>累计记录：<strong id="statDays">1</strong> 天</span>
+              <span>记忆孔洞：<strong id="statHoles">0</strong> 枚音符</span>
+              <span>当前选中：<strong id="statSelectedDay">Day 1</strong></span>
+            </div>
+            <span>提示：点击日期列头切换编辑日；点击格子可直接打孔/消孔</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 声学与产品设计亮点 -->
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>① 五声音阶天然悦耳</h3>
+          <p>采用 C·D·E·G·A 宫调式五声音阶（C4–E7），彻底消除半音碰撞，任意组合皆清澈空灵。</p>
+        </div>
+        <div class="info-card">
+          <h3>② 智能三音协和扫弦</h3>
+          <p>单日事件较多时，纸带全量保留记忆孔洞，发声自动优选最协和的 3 音以 52ms 微扫弦温柔齐鸣。</p>
+        </div>
+        <div class="info-card">
+          <h3>③ 水晶音梳 + 木箱混响</h3>
+          <p>模拟高碳钢音梳 2.76x 钟琴泛音与胡桃木箱体混响，还原真实机械八音盒的清脆颗粒感。</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // 1. 18 音阶五声音阶配置（C4 -> E7）
+    const DEFAULT_NOTES = [
+      { id: 1,  note: 'C4', freq: 261.63,  event: '极端天气（暴雨/大雪/冰雹/极端高低温/台风…）' },
+      { id: 2,  note: 'D4', freq: 293.66,  event: '深夜开车（0点-6点）' },
+      { id: 3,  note: 'E4', freq: 329.63,  event: '使用小憩模式 > 30min' },
+      { id: 4,  note: 'G4', freq: 392.00,  event: '长途自驾' },
+      { id: 5,  note: 'A4', freq: 440.00,  event: '低电量充满电' },
+      { id: 6,  note: 'C5', freq: 523.25,  event: 'OTA 升级' },
+      { id: 7,  note: 'D5', freq: 587.33,  event: '单曲循环超过 5 次' },
+      { id: 8,  note: 'E5', freq: 659.25,  event: '看电影持续超过 1h' },
+      { id: 9,  note: 'G5', freq: 783.99,  event: 'K 歌持续超过 30min' },
+      { id: 10, note: 'A5', freq: 880.00,  event: '和 EVA 对话超过 15 次' },
+      { id: 11, note: 'C6', freq: 1046.50, event: '多人乘车' },
+      { id: 12, note: 'D6', freq: 1174.66, event: '露营模式' },
+      { id: 13, note: 'E6', freq: 1318.51, event: '达成舒适星光成就' },
+      { id: 14, note: 'G6', freq: 1567.98, event: '达成娱乐星光成就' },
+      { id: 15, note: 'A6', freq: 1760.00, event: '达成出行星光成就' },
+      { id: 16, note: 'C7', freq: 2093.00, event: '达成用车星光成就' },
+      { id: 17, note: 'D7', freq: 2349.32, event: '达成 EVA 星光成就' },
+      { id: 18, note: 'E7', freq: 2637.02, event: '用户专属特殊日子（生日/提车纪念日）' }
+    ];
+
+    function safeLoadJSON(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    let state = {
+      notes: safeLoadJSON('mb_notes_light_v4', JSON.parse(JSON.stringify(DEFAULT_NOTES))),
+      days: safeLoadJSON('mb_days_light_v4', [
+        { label: 'Day 1', completedIds: [6, 9, 11] }
+      ]),
+      selectedDayIndex: 0,
+      playMode: 'arpeggio',
+      bpm: 84,
+      isPlaying: false,
+      playTimers: []
+    };
+
+    function saveState() {
+      try {
+        localStorage.setItem('mb_notes_light_v4', JSON.stringify(state.notes));
+        localStorage.setItem('mb_days_light_v4', JSON.stringify(state.days));
+      } catch (e) {}
+    }
+
+    // 2. 物理建模水晶八音盒引擎
+    class CrystalMusicBoxEngine {
+      constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.reverbNode = null;
+        this.noiseBuffer = null;
+      }
+
+      ensureCtx() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+
+          const compressor = this.ctx.createDynamicsCompressor();
+          compressor.threshold.setValueAtTime(-14, this.ctx.currentTime);
+          compressor.knee.setValueAtTime(18, this.ctx.currentTime);
+          compressor.ratio.setValueAtTime(4, this.ctx.currentTime);
+          compressor.attack.setValueAtTime(0.003, this.ctx.currentTime);
+          compressor.release.setValueAtTime(0.25, this.ctx.currentTime);
+
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.setValueAtTime(0.92, this.ctx.currentTime);
+
+          this.reverbNode = this.ctx.createConvolver();
+          this.reverbNode.buffer = this.createWoodBoxImpulse(1.6, 2.8);
+
+          const wetGain = this.ctx.createGain();
+          wetGain.gain.setValueAtTime(0.32, this.ctx.currentTime);
+
+          const dryGain = this.ctx.createGain();
+          dryGain.gain.setValueAtTime(0.86, this.ctx.currentTime);
+
+          this.masterGain.connect(dryGain);
+          this.masterGain.connect(this.reverbNode);
+          this.reverbNode.connect(wetGain);
+
+          dryGain.connect(compressor);
+          wetGain.connect(compressor);
+          compressor.connect(this.ctx.destination);
+
+          this.noiseBuffer = this.createPluckNoiseBuffer();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      createWoodBoxImpulse(durationSec, decayRate) {
+        const rate = this.ctx.sampleRate;
+        const length = Math.floor(rate * durationSec);
+        const impulse = this.ctx.createBuffer(2, length, rate);
+        for (let ch = 0; ch < 2; ch++) {
+          const data = impulse.getChannelData(ch);
+          for (let i = 0; i < length; i++) {
+            const t = i / rate;
+            const env = Math.pow(1 - i / length, decayRate);
+            data[i] = (Math.random() * 2 - 1) * env * (t < 0.04 ? 0.6 : 0.35);
+          }
+        }
+        return impulse;
+      }
+
+      createPluckNoiseBuffer() {
+        const length = Math.floor(this.ctx.sampleRate * 0.02);
+        const buf = this.ctx.createBuffer(1, length, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < length; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (length * 0.25));
+        }
+        return buf;
+      }
+
+      pluck(freq, delaySec = 0, velocity = 0.85) {
+        this.ensureCtx();
+        const now = this.ctx.currentTime + delaySec;
+        const decayTime = Math.max(0.95, 2.3 - (freq / 2800) * 1.1);
+
+        // 主基频
+        const oscMain = this.ctx.createOscillator();
+        oscMain.type = 'sine';
+        oscMain.frequency.setValueAtTime(freq, now);
+
+        const gainMain = this.ctx.createGain();
+        gainMain.gain.setValueAtTime(0.0001, now);
+        gainMain.gain.linearRampToValueAtTime(0.32 * velocity, now + 0.004);
+        gainMain.gain.exponentialRampToValueAtTime(0.0005, now + decayTime);
+
+        oscMain.connect(gainMain);
+        gainMain.connect(this.masterGain);
+
+        // 2.756x 钟琴金属泛音
+        const bellFreq = freq * 2.756;
+        if (bellFreq < 11000) {
+          const oscBell = this.ctx.createOscillator();
+          oscBell.type = 'sine';
+          oscBell.frequency.setValueAtTime(bellFreq, now);
+
+          const gainBell = this.ctx.createGain();
+          gainBell.gain.setValueAtTime(0.0001, now);
+          gainBell.gain.linearRampToValueAtTime(0.095 * velocity, now + 0.002);
+          gainBell.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+
+          oscBell.connect(gainBell);
+          gainBell.connect(this.masterGain);
+          oscBell.start(now);
+          oscBell.stop(now + 0.25);
+        }
+
+        // 2.0x 高八度空气感泛音
+        const oscOct = this.ctx.createOscillator();
+        oscOct.type = 'sine';
+        oscOct.frequency.setValueAtTime(freq * 2, now);
+
+        const gainOct = this.ctx.createGain();
+        gainOct.gain.setValueAtTime(0.0001, now);
+        gainOct.gain.linearRampToValueAtTime(0.06 * velocity, now + 0.003);
+        gainOct.gain.exponentialRampToValueAtTime(0.0002, now + 0.55);
+
+        oscOct.connect(gainOct);
+        gainOct.connect(this.masterGain);
+
+        // 钢针拨片瞬态
+        const noiseSrc = this.ctx.createBufferSource();
+        noiseSrc.buffer = this.noiseBuffer;
+
+        const bandpass = this.ctx.createBiquadFilter();
+        bandpass.type = 'bandpass';
+        bandpass.frequency.setValueAtTime(Math.min(6500, freq * 3.2), now);
+        bandpass.Q.setValueAtTime(4.5, now);
+
+        const gainClick = this.ctx.createGain();
+        gainClick.gain.setValueAtTime(0.16 * velocity, now);
+        gainClick.gain.exponentialRampToValueAtTime(0.001, now + 0.018);
+
+        noiseSrc.connect(bandpass);
+        bandpass.connect(gainClick);
+        gainClick.connect(this.masterGain);
+
+        oscMain.start(now);
+        oscOct.start(now);
+        noiseSrc.start(now);
+
+        oscMain.stop(now + decayTime + 0.05);
+        oscOct.stop(now + 0.6);
+        noiseSrc.stop(now + 0.025);
+      }
+    }
+
+    const audioEngine = new CrystalMusicBoxEngine();
+
+    // 3. 智能三音协和优选算法
+    function selectHarmoniousVoicing(sortedIds) {
+      if (sortedIds.length <= 3) return sortedIds;
+      const lowest = sortedIds[0];
+      const highest = sortedIds[sortedIds.length - 1];
+      const middleCandidates = sortedIds.slice(1, -1);
+      let bestMid = middleCandidates[Math.floor(middleCandidates.length / 2)];
+      for (const cand of middleCandidates) {
+        const diff = (cand - lowest) % 5;
+        if (diff === 3 || diff === 2 || diff === 0) {
+          bestMid = cand;
+          break;
+        }
+      }
+      return [lowest, bestMid, highest];
+    }
+
+    // 4. 视觉反馈与播放调度
+    function triggerVisualNote(noteObj, dayLabel = '') {
+      const tooth = document.getElementById(`comb-tooth-${noteObj.id}`);
+      if (tooth) {
+        tooth.classList.remove('comb-active');
+        void tooth.offsetWidth;
+        tooth.classList.add('comb-active');
+      }
+
+      const subText = document.getElementById('memorySubtitleText');
+      const badge = document.getElementById('playingNoteBadge');
+      if (subText && badge) {
+        const prefix = dayLabel ? `【${dayLabel}】` : '';
+        subText.textContent = `${prefix}${noteObj.event}`;
+        badge.textContent = `${noteObj.note} · ${Math.round(noteObj.freq)}Hz`;
+        badge.classList.remove('hidden');
+      }
+    }
+
+    function stopPlayback() {
+      state.playTimers.forEach(t => clearTimeout(t));
+      state.playTimers = [];
+      state.isPlaying = false;
+
+      document.getElementById('playAllIcon').textContent = '▶';
+      document.getElementById('playAllText').textContent = '播放累计乐谱';
+      document.getElementById('playheadLine').classList.add('hidden');
+    }
+
+    function scheduleDayNotes(dayObj, dayIdx, startTimeOffsetMs) {
+      const sortedIds = [...dayObj.completedIds].sort((a, b) => a - b);
+      const beatMs = (60 / state.bpm) * 1000;
+
+      const tHead = setTimeout(() => {
+        highlightDayColumn(dayIdx);
+      }, startTimeOffsetMs);
+      state.playTimers.push(tHead);
+
+      if (sortedIds.length === 0) {
+        return beatMs * 0.65;
+      }
+
+      if (state.playMode === 'chord') {
+        const voicedIds = selectHarmoniousVoicing(sortedIds);
+        const strumGapMs = 52;
+
+        voicedIds.forEach((id, idx) => {
+          const noteObj = state.notes.find(n => n.id === id);
+          if (!noteObj) return;
+
+          const tNote = setTimeout(() => {
+            const velocity = idx === voicedIds.length - 1 ? 0.92 : 0.72;
+            audioEngine.pluck(noteObj.freq, 0, velocity);
+            triggerVisualNote(noteObj, dayObj.label);
+
+            if (sortedIds.length > 1 && idx === voicedIds.length - 1) {
+              const names = sortedIds.map(xId => {
+                const n = state.notes.find(x => x.id === xId);
+                return n ? n.event.split('（')[0] : '';
+              }).filter(Boolean);
+              const filterHint = sortedIds.length > 3 ? `（优选 ${voicedIds.length} 音协和扫弦）` : '';
+              document.getElementById('memorySubtitleText').textContent =
+                `【${dayObj.label}】${names.join(' + ')} ${filterHint}`;
+            }
+          }, startTimeOffsetMs + idx * strumGapMs);
+          state.playTimers.push(tNote);
+        });
+
+        return beatMs * 1.25;
+      } else {
+        const stepMs = Math.max(145, Math.min(260, beatMs * 0.42));
+        sortedIds.forEach((id, idx) => {
+          const noteObj = state.notes.find(n => n.id === id);
+          if (!noteObj) return;
+          const tNote = setTimeout(() => {
+            audioEngine.pluck(noteObj.freq, 0, 0.88);
+            triggerVisualNote(noteObj, dayObj.label);
+          }, startTimeOffsetMs + idx * stepMs);
+          state.playTimers.push(tNote);
+        });
+
+        return Math.max(beatMs, sortedIds.length * stepMs + 160);
+      }
+    }
+
+    function playAllDays() {
+      if (state.isPlaying) {
+        stopPlayback();
+        return;
+      }
+      audioEngine.ensureCtx();
+      state.isPlaying = true;
+      document.getElementById('playAllIcon').textContent = '⏹';
+      document.getElementById('playAllText').textContent = '停止播放';
+
+      let cursorMs = 50;
+      state.days.forEach((day, idx) => {
+        const duration = scheduleDayNotes(day, idx, cursorMs);
+        cursorMs += duration;
+      });
+
+      const tEnd = setTimeout(() => {
+        stopPlayback();
+        document.getElementById('memorySubtitleText').textContent =
+          `✨ 完整 ${state.days.length} 日记忆乐章演奏完毕，共沉淀 ${countTotalHoles()} 枚声音记忆。`;
+      }, cursorMs + 400);
+      state.playTimers.push(tEnd);
+    }
+
+    function playSingleDay(dayIdx) {
+      stopPlayback();
+      audioEngine.ensureCtx();
+      const day = state.days[dayIdx];
+      if (!day) return;
+      if (day.completedIds.length === 0) {
+        document.getElementById('memorySubtitleText').textContent =
+          `【${day.label}】暂无打孔记录，请先在左侧勾选当天完成的事件。`;
+        return;
+      }
+      scheduleDayNotes(day, dayIdx, 20);
+      const tClean = setTimeout(() => {
+        document.getElementById('playheadLine').classList.add('hidden');
+      }, 1400);
+      state.playTimers.push(tClean);
+    }
+
+    function highlightDayColumn(dayIdx) {
+      const colEl = document.getElementById(`day-col-header-${dayIdx}`);
+      const playhead = document.getElementById('playheadLine');
+      const viewport = document.getElementById('tapeScrollViewport');
+      if (colEl && playhead && viewport) {
+        const leftPos = colEl.offsetLeft + colEl.offsetWidth / 2;
+        playhead.style.left = `${leftPos}px`;
+        playhead.classList.remove('hidden');
+
+        const targetScroll = leftPos - viewport.clientWidth / 2;
+        viewport.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+      }
+    }
+
+    // 5. 渲染界面
+    function countTotalHoles() {
+      return state.days.reduce((sum, d) => sum + d.completedIds.length, 0);
+    }
+
+    function renderAll() {
+      renderLeftScaleList();
+      renderCombTeeth();
+      renderPaperTape();
+      updateStats();
+    }
+
+    function renderLeftScaleList() {
+      const container = document.getElementById('scaleListContainer');
+      const currentDay = state.days[state.selectedDayIndex] || state.days[0];
+      document.getElementById('activeDayBadge').textContent = currentDay.label;
+
+      container.innerHTML = '';
+      state.notes.forEach(item => {
+        const isChecked = currentDay.completedIds.includes(item.id);
+
+        const row = document.createElement('div');
+        row.className = `scale-row ${isChecked ? 'checked' : ''}`;
+
+        const colNote = document.createElement('div');
+        const noteBtn = document.createElement('button');
+        noteBtn.className = 'note-btn';
+        noteBtn.textContent = item.note;
+        noteBtn.title = `试听 ${item.note}`;
+        noteBtn.onclick = () => {
+          audioEngine.pluck(item.freq, 0, 0.9);
+          triggerVisualNote(item);
+        };
+        colNote.appendChild(noteBtn);
+
+        const colEvent = document.createElement('div');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'event-input';
+        input.value = item.event;
+        input.onchange = (e) => {
+          const val = e.target.value.trim();
+          if (val) {
+            item.event = val;
+            saveState();
+          } else {
+            e.target.value = item.event;
+          }
+        };
+        colEvent.appendChild(input);
+
+        const colCheck = document.createElement('div');
+        colCheck.className = 'check-wrap';
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = `punch-toggle ${isChecked ? 'active' : ''}`;
+        toggleBtn.textContent = '●';
+        toggleBtn.title = isChecked ? '取消今日打孔' : '打卡并打孔';
+        toggleBtn.onclick = () => {
+          toggleHole(state.selectedDayIndex, item.id);
+        };
+        colCheck.appendChild(toggleBtn);
+
+        row.appendChild(colNote);
+        row.appendChild(colEvent);
+        row.appendChild(colCheck);
+        container.appendChild(row);
+      });
+    }
+
+    function renderCombTeeth() {
+      const container = document.getElementById('combTeethContainer');
+      container.innerHTML = '';
+      state.notes.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'comb-row';
+
+        const label = document.createElement('span');
+        label.className = 'comb-note';
+        label.textContent = item.note;
+
+        const widthPercent = 76 - idx * 1.9;
+        const tooth = document.createElement('div');
+        tooth.id = `comb-tooth-${item.id}`;
+        tooth.className = 'comb-tooth';
+        tooth.style.width = `${widthPercent}%`;
+        tooth.title = `${item.note}: ${item.event}`;
+        tooth.onclick = () => {
+          audioEngine.pluck(item.freq, 0, 0.9);
+          triggerVisualNote(item);
+        };
+
+        row.appendChild(label);
+        row.appendChild(tooth);
+        container.appendChild(row);
+      });
+    }
+
+    function renderPaperTape() {
+      const grid = document.getElementById('paperGridContainer');
+      grid.innerHTML = '';
+
+      const headerRow = document.createElement('div');
+      headerRow.className = 'paper-header-row';
+
+      state.days.forEach((day, dIdx) => {
+        const isSelected = dIdx === state.selectedDayIndex;
+        const cell = document.createElement('div');
+        cell.id = `day-col-header-${dIdx}`;
+        cell.className = `day-col-head ${isSelected ? 'selected' : ''}`;
+        cell.innerHTML = `
+          <div class="day-col-title">${day.label}</div>
+          <div class="day-col-count">${day.completedIds.length}孔</div>
+        `;
+        cell.onclick = () => {
+          state.selectedDayIndex = dIdx;
+          renderAll();
+        };
+        headerRow.appendChild(cell);
+      });
+      grid.appendChild(headerRow);
+
+      const tracksWrap = document.createElement('div');
+      tracksWrap.className = 'paper-tracks';
+
+      state.notes.forEach(noteItem => {
+        const trackRow = document.createElement('div');
+        trackRow.className = 'track-row';
+
+        state.days.forEach((day, dIdx) => {
+          const isPunched = day.completedIds.includes(noteItem.id);
+          const isSelectedDay = dIdx === state.selectedDayIndex;
+
+          const cell = document.createElement('div');
+          cell.className = `track-cell ${isSelectedDay ? 'selected-col' : ''}`;
+          cell.title = `${day.label} · ${noteItem.note}（${noteItem.event}）`;
+          cell.onclick = () => {
+            state.selectedDayIndex = dIdx;
+            toggleHole(dIdx, noteItem.id);
+          };
+
+          const hole = document.createElement('div');
+          hole.className = isPunched ? 'hole-punched' : 'hole-dot';
+          cell.appendChild(hole);
+          trackRow.appendChild(cell);
+        });
+
+        tracksWrap.appendChild(trackRow);
+      });
+
+      grid.appendChild(tracksWrap);
+    }
+
+    function toggleHole(dayIdx, noteId) {
+      const day = state.days[dayIdx];
+      if (!day) return;
+
+      const existsIdx = day.completedIds.indexOf(noteId);
+      const noteObj = state.notes.find(n => n.id === noteId);
+
+      if (existsIdx > -1) {
+        day.completedIds.splice(existsIdx, 1);
+      } else {
+        day.completedIds.push(noteId);
+        if (noteObj) {
+          audioEngine.pluck(noteObj.freq, 0, 0.9);
+          triggerVisualNote(noteObj, day.label);
+        }
+      }
+
+      saveState();
+      renderAll();
+    }
+
+    function updateStats() {
+      document.getElementById('statDays').textContent = state.days.length;
+      document.getElementById('statHoles').textContent = countTotalHoles();
+      const cur = state.days[state.selectedDayIndex];
+      document.getElementById('statSelectedDay').textContent = cur ? cur.label : 'Day 1';
+    }
+
+    function syncModeButtons() {
+      const arpBtn = document.getElementById('modeArpBtn');
+      const chordBtn = document.getElementById('modeChordBtn');
+      if (state.playMode === 'arpeggio') {
+        arpBtn.classList.add('active');
+        chordBtn.classList.remove('active');
+      } else {
+        chordBtn.classList.add('active');
+        arpBtn.classList.remove('active');
+      }
+    }
+
+    // 6. 事件绑定
+    document.getElementById('modeArpBtn').onclick = () => {
+      state.playMode = 'arpeggio';
+      syncModeButtons();
+    };
+
+    document.getElementById('modeChordBtn').onclick = () => {
+      state.playMode = 'chord';
+      syncModeButtons();
+    };
+
+    document.getElementById('tempoSlider').oninput = (e) => {
+      state.bpm = Number(e.target.value);
+      document.getElementById('tempoVal').textContent = `${state.bpm} BPM`;
+    };
+
+    document.getElementById('playAllBtn').onclick = playAllDays;
+
+    document.getElementById('playCurrentDayBtn').onclick = () => {
+      playSingleDay(state.selectedDayIndex);
+    };
+
+    document.getElementById('addDayBtn').onclick = () => {
+      stopPlayback();
+      const nextNum = state.days.length + 1;
+      state.days.push({
+        label: `Day ${nextNum}`,
+        completedIds: []
+      });
+      state.selectedDayIndex = state.days.length - 1;
+      saveState();
+      renderAll();
+
+      const viewport = document.getElementById('tapeScrollViewport');
+      viewport.scrollTo({ left: viewport.scrollWidth, behavior: 'smooth' });
+    };
+
+    document.getElementById('clearAllDaysBtn').onclick = () => {
+      stopPlayback();
+      state.days = [{ label: 'Day 1', completedIds: [] }];
+      state.selectedDayIndex = 0;
+      saveState();
+      renderAll();
+      document.getElementById('memorySubtitleText').textContent = '纸带已重置为全新空白卷轴，开始记录你的第一天吧。';
+      document.getElementById('playingNoteBadge').classList.add('hidden');
+    };
+
+    document.getElementById('resetEventsBtn').onclick = () => {
+      state.notes = JSON.parse(JSON.stringify(DEFAULT_NOTES));
+      saveState();
+      renderAll();
+    };
+
+    document.getElementById('seedDemoBtn').onclick = () => {
+      stopPlayback();
+      state.days = [
+        { label: 'Day 1', completedIds: [6, 8, 9, 11] },
+        { label: 'Day 2', completedIds: [9, 10, 8] },
+        { label: 'Day 3', completedIds: [4, 6, 8, 10] },
+        { label: 'Day 4', completedIds: [3, 4, 6, 9] },
+        { label: 'Day 5', completedIds: [5, 6, 8, 12] },
+        { label: 'Day 6', completedIds: [4, 7, 9, 13] },
+        { label: 'Day 7', completedIds: [6, 9, 11, 16] }
+      ];
+      state.selectedDayIndex = 0;
+      saveState();
+      renderAll();
+      playAllDays();
+    };
+
+    syncModeButtons();
+    renderAll();
+  </script>
+</body>
+</html>
