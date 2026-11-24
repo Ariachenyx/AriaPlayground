@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVA ❄️ 冬日摄像头手势互动彩蛋</title>
+    <title>❄️ 冬日节奏天国 · 摄像头手势互动 Demo</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -39,6 +39,25 @@
         @keyframes pulseGlow {
             0% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
             100% { box-shadow: 0 0 30px rgba(186, 230, 253, 0.8); }
+        }
+
+        /* Equalizer Music Bars Animation */
+        @keyframes eqBounce {
+            0%, 100% { height: 4px; }
+            50% { height: 14px; }
+        }
+        .eq-bar {
+            width: 3px;
+            border-radius: 999px;
+            background-color: #fde047;
+            animation: eqBounce 0.6s ease-in-out infinite;
+        }
+        .eq-bar:nth-child(2) { animation-delay: 0.15s; }
+        .eq-bar:nth-child(3) { animation-delay: 0.3s; }
+        .eq-paused .eq-bar {
+            animation: none;
+            height: 4px;
+            background-color: #94a3b8;
         }
 
         /* Canvas layering */
@@ -83,8 +102,8 @@
             </div>
             <div>
                 <div class="font-bold text-base tracking-wide flex items-center gap-2">
-                    EVA 智能座舱
-                    <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">冬日彩蛋 2.0</span>
+                    冬日节奏互动
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">节奏天国模式</span>
                 </div>
                 <div class="flex items-center gap-2 text-xs text-slate-300 mt-0.5">
                     <span id="threadStatus" class="flex items-center gap-1 text-emerald-400 font-medium">
@@ -113,10 +132,16 @@
                 </div>
                 <div class="w-full bg-slate-800/80 rounded-full h-2.5 overflow-hidden p-0.5 border border-white/10 relative">
                     <div id="snowBar" class="bg-gradient-to-r from-cyan-400 via-sky-300 to-white h-full rounded-full transition-all duration-300 w-[10%]"></div>
-                    <div class="absolute top-0 left-[30%] w-0.5 h-full bg-white/40" title="阶段1: 帽子和脸"></div>
-                    <div class="absolute top-0 left-[65%] w-0.5 h-full bg-white/40" title="阶段2: 身体"></div>
-                    <div class="absolute top-0 left-[98%] w-0.5 h-full bg-white/40" title="阶段3: 围巾与手臂"></div>
+                    <div class="absolute top-0 left-[30%] w-0.5 h-full bg-white/40" title="阶段1: 帽子与雪人脸"></div>
+                    <div class="absolute top-0 left-[65%] w-0.5 h-full bg-white/40" title="阶段2: 圆滚滚雪身体"></div>
+                    <div class="absolute top-0 left-[98%] w-0.5 h-full bg-white/40" title="阶段3: 围巾与树枝手臂"></div>
                 </div>
+            </div>
+
+            <!-- Rhythm Combo Counter -->
+            <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/30 text-xs text-amber-200 font-semibold" title="节奏天国卡拍连击数">
+                <i class="fa-solid fa-music text-amber-300"></i>
+                <span>卡拍连击: <strong id="comboCountText" class="text-white">0</strong></span>
             </div>
 
             <!-- Action Buttons -->
@@ -126,33 +151,60 @@
                     <span class="hidden md:inline">凝霜</span>
                 </button>
                 
-                <button id="audioBtn" class="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition active:scale-95" title="音效开关">
-                    <i id="audioIcon" class="fa-solid fa-volume-high text-cyan-300"></i>
+                <button id="audioBtn" class="eq-paused p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-slate-300 transition-all duration-300 active:scale-95 flex items-center gap-2 px-3.5 text-xs font-bold" title="点击开启/关闭背景音乐">
+                    <div class="flex items-end gap-0.5 h-3.5">
+                        <span class="eq-bar"></span>
+                        <span class="eq-bar"></span>
+                        <span class="eq-bar"></span>
+                    </div>
+                    <span id="audioLabel">开启音乐</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Rhythm Heaven Style 4-Beat Call & Response Bar -->
+    <div id="rhythmHud" class="absolute top-24 left-1/2 -translate-x-1/2 glass-panel px-6 py-3 rounded-2xl z-30 flex flex-col items-center gap-2 border border-amber-400/30 shadow-2xl min-w-[310px] sm:min-w-[420px]">
+        <div class="flex items-center justify-between w-full text-xs">
+            <span id="rhythmPhaseBadge" class="px-2.5 py-0.5 rounded-full bg-cyan-500/25 text-cyan-200 font-bold border border-cyan-400/30">
+                👀 示范回合 · 看节拍
+            </span>
+            <span id="rhythmTargetLabel" class="text-amber-200 font-semibold">
+                节奏口诀：1-2-3 握拳蓄力 → 第 4 拍张掌！
+            </span>
+        </div>
+        <!-- 4-Beat Dots -->
+        <div class="flex items-center justify-center gap-4 my-0.5">
+            <div id="beatDot0" class="w-5 h-5 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-[10px] font-bold text-white/70 transition-all duration-100">✊</div>
+            <div id="beatDot1" class="w-5 h-5 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-[10px] font-bold text-white/70 transition-all duration-100">✊</div>
+            <div id="beatDot2" class="w-5 h-5 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-[10px] font-bold text-white/70 transition-all duration-100">✊</div>
+            <div id="beatDot3" class="w-6 h-6 rounded-full bg-amber-400/25 border-2 border-amber-300/60 flex items-center justify-center text-xs font-bold text-amber-200 transition-all duration-100">🖐️</div>
+        </div>
+        <div id="rhythmFeedbackText" class="text-xs font-bold tracking-wider text-slate-300 h-4">
+            跟着节拍：✊ 1 - ✊ 2 - ✊ 3 - 【🖐️ 第4拍发射！】
         </div>
     </div>
 
     <!-- Bottom Instructions Guide Overlay -->
     <div class="absolute bottom-4 left-1/2 -translate-x-1/2 glass-panel px-6 py-3 rounded-full text-xs text-slate-200 z-30 flex items-center space-x-6 shadow-2xl border border-white/15 max-w-[95%] overflow-x-auto whitespace-nowrap">
         <div class="flex items-center space-x-2">
+            <span class="w-6 h-6 rounded-full bg-amber-500/30 flex items-center justify-center text-amber-300 font-bold">♪</span>
+            <span>第 1-3 拍握拳蓄力，第 4 拍张掌丢雪球</span>
+        </div>
+        <div class="w-px h-4 bg-white/20"></div>
+        <div class="flex items-center space-x-2">
             <span class="w-6 h-6 rounded-full bg-cyan-500/30 flex items-center justify-center text-cyan-300 font-bold">1</span>
-            <span>伸出食指擦除霜雾</span>
+            <span>食指擦除霜雾</span>
         </div>
         <div class="w-px h-4 bg-white/20"></div>
         <div class="flex items-center space-x-2">
             <span class="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center text-blue-300 font-bold">2</span>
-            <span>握紧拳头蓄力雪球</span>
+            <span>1-3 拍握拳 → 第 4 拍张掌发射</span>
         </div>
         <div class="w-px h-4 bg-white/20"></div>
         <div class="flex items-center space-x-2">
-            <span class="w-6 h-6 rounded-full bg-sky-500/30 flex items-center justify-center text-sky-300 font-bold">3</span>
-            <span>张开手掌发射砸屏</span>
-        </div>
-        <div class="w-px h-4 bg-white/20"></div>
-        <div class="flex items-center space-x-2">
-            <span class="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center text-emerald-300 font-bold">4</span>
-            <span>食指轻戳积雪中长出的雪人</span>
+            <span class="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center text-emerald-300 font-bold">3</span>
+            <span>食指戳可爱雪人</span>
         </div>
     </div>
 
@@ -163,9 +215,9 @@
                 <i class="fa-solid fa-snowflake"></i>
             </div>
             <div class="space-y-2">
-                <h2 class="text-2xl font-bold text-white">开启冬日手势互动</h2>
+                <h2 class="text-2xl font-bold text-white">开启冬日节奏手势互动</h2>
                 <p id="modalDesc" class="text-sm text-slate-300 leading-relaxed">
-                    请允许开启摄像头体验 EVA 冬日限定彩蛋。识别全部在本地通过浏览器运行，安全无泄漏。
+                    请允许开启摄像头体验《节奏天国》式冬日手势彩蛋：先看节拍示范，再在固定节拍下完成擦窗与丢雪球动作。
                 </p>
             </div>
             <button id="startBtn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-400 to-blue-600 hover:opacity-95 text-white font-bold text-base shadow-lg shadow-cyan-500/30 transition active:scale-98 flex items-center justify-center gap-2">
@@ -178,79 +230,186 @@
     <!-- Main Interactive Script Logic -->
     <script>
         /**
-         * Web Audio Synthesizer for Procedural Sound FX
+         * Pure Web Audio API Real-Time Synthesizer Engine
+         * 100 BPM Rhythm Heaven Call-and-Response Winter Arrangement (Zero external URLs / Zero Blob URLs)
          */
         class SoundEngine {
             constructor() {
                 this.ctx = null;
-                this.muted = false;
+                this.muted = true;
+                this.bgmTimer = null;
+                this.stepIndex = 0;
             }
             init() {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return null;
                 if (!this.ctx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    this.ctx = new AudioContext();
+                    this.ctx = new AudioCtx();
                 }
                 if (this.ctx.state === 'suspended') {
-                    this.ctx.resume();
+                    this.ctx.resume().catch(() => {});
+                }
+                return this.ctx;
+            }
+            updateStatusBadge() {
+                const btn = document.getElementById('audioBtn');
+                const label = document.getElementById('audioLabel');
+                if (!btn || !label) return;
+                if (!this.muted) {
+                    btn.className = 'p-2.5 rounded-xl bg-gradient-to-r from-amber-500/40 to-orange-500/40 border border-amber-300/80 text-amber-100 transition-all duration-300 active:scale-95 flex items-center gap-2 px-3.5 text-xs font-bold shadow-lg shadow-amber-500/30';
+                    label.textContent = '音乐中 ♪';
+                } else {
+                    btn.className = 'eq-paused p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-slate-300 transition-all duration-300 active:scale-95 flex items-center gap-2 px-3.5 text-xs font-bold';
+                    label.textContent = '开启音乐';
+                }
+            }
+            startBgm() {
+                this.init();
+                this.muted = false;
+                this.updateStatusBadge();
+                if (this.bgmTimer) return;
+                // 100 BPM -> 1 quarter note = 600ms, 16th note step = 150ms (32 steps = 8 beats Call & Response)
+                this.stepIndex = 0;
+                this.playBgmStep(0);
+                this.bgmTimer = setInterval(() => {
+                    this.stepIndex = (this.stepIndex + 1) % 32;
+                    this.playBgmStep(this.stepIndex);
+                }, 150);
+            }
+            reinitAfterCamera() {
+                // Rebuild AudioContext after getUserMedia() so macOS/Chrome CoreAudio route stays attached
+                this.stopBgm();
+                if (this.ctx) {
+                    try { this.ctx.close(); } catch (_) {}
+                    this.ctx = null;
+                }
+                this.startBgm();
+            }
+            stopBgm() {
+                if (this.bgmTimer) {
+                    clearInterval(this.bgmTimer);
+                    this.bgmTimer = null;
                 }
             }
             toggleMute() {
-                this.muted = !this.muted;
+                this.init();
+                if (this.muted) {
+                    this.startBgm();
+                } else {
+                    this.muted = true;
+                    this.stopBgm();
+                    this.updateStatusBadge();
+                }
                 return this.muted;
             }
+            playTone(freq, type, duration, gainVal, delay = 0) {
+                if (this.muted || !freq) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime + delay;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(gainVal, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + duration + 0.02);
+                } catch (_) {}
+            }
+            playNoise(duration, gainVal) {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+                try {
+                    const sampleRate = this.ctx.sampleRate;
+                    const length = Math.floor(sampleRate * duration);
+                    const buffer = this.ctx.createBuffer(1, length, sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < length; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+                    const src = this.ctx.createBufferSource();
+                    src.buffer = buffer;
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'highpass';
+                    filter.frequency.value = 3500;
+                    const gain = this.ctx.createGain();
+                    const now = this.ctx.currentTime;
+                    gain.gain.setValueAtTime(gainVal, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                    src.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    src.start(now);
+                } catch (_) {}
+            }
+            playBgmStep(step) {
+                if (this.muted) return;
+                const isPlayerTurn = step >= 16;
+                const beatInBar = Math.floor((step % 16) / 4); // 0, 1, 2, 3
+                const subStep = step % 4; // 0, 1, 2, 3 (16th notes)
+
+                // 1. Bouncy Octave Triangle Bass (on beat & off-beat)
+                const bassRoots = [130.81, 130.81, 174.61, 196.00]; // C3, C3, F3, G3
+                const root = bassRoots[beatInBar];
+                if (subStep === 0) {
+                    this.playTone(root, 'triangle', 0.22, 0.22);
+                } else if (subStep === 2) {
+                    this.playTone(root * 2, 'triangle', 0.16, 0.16);
+                }
+
+                // 2. Crisp Percussion (Kick on 0,2; Snare + Hi-hat boosted in Player Turn)
+                if (subStep === 0 && (beatInBar === 0 || beatInBar === 2)) {
+                    this.playTone(110, 'sine', 0.12, isPlayerTurn ? 0.28 : 0.18);
+                }
+                if (subStep === 0 && (beatInBar === 1 || beatInBar === 3)) {
+                    this.playNoise(0.09, isPlayerTurn ? 0.14 : 0.07);
+                } else if (subStep === 2) {
+                    this.playNoise(0.04, 0.04); // Sleigh hi-hat
+                }
+
+                // 3. Celesta / Music-Box Call & Response Melody (Jingle Bells x Rhythm Heaven syncopation)
+                const demoMelody = {
+                    0: 659.25, 2: 659.25, 4: 659.25,       // E5 E5 E5
+                    8: 659.25, 10: 783.99, 12: 1046.50     // E5 G5 C6 (Cue!)
+                };
+                const playerMelody = {
+                    16: 523.25, 18: 587.33, 20: 659.25,    // C5 D5 E5 (Hold 1-2-3)
+                    24: 783.99, 28: 1318.51                // G5 -> E6 (Beat 4 Release!)
+                };
+                const noteFreq = isPlayerTurn ? playerMelody[step] : demoMelody[step];
+                if (noteFreq) {
+                    this.playTone(noteFreq, 'sine', 0.26, 0.22);
+                    this.playTone(noteFreq * 2, 'sine', 0.14, 0.06); // Bell overtone
+                }
+            }
+            syncClock() {}
             playPoke() {
-                if (this.muted || !this.ctx) return;
-                const now = this.ctx.currentTime;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(320, now);
-                osc.frequency.exponentialRampToValueAtTime(640, now + 0.08);
-                osc.frequency.exponentialRampToValueAtTime(420, now + 0.22);
-                gain.gain.setValueAtTime(0.35, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(now + 0.25);
+                this.playTone(440, 'sine', 0.14, 0.25, 0);
+                this.playTone(660, 'sine', 0.18, 0.25, 0.07);
             }
             playSplat() {
-                if (this.muted || !this.ctx) return;
-                const now = this.ctx.currentTime;
-                const bufferSize = this.ctx.sampleRate * 0.25;
-                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-                const output = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    output[i] = Math.random() * 2 - 1;
-                }
-                const whiteNoise = this.ctx.createBufferSource();
-                whiteNoise.buffer = buffer;
-                const filter = this.ctx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.frequency.setValueAtTime(1000, now);
-                filter.frequency.exponentialRampToValueAtTime(120, now + 0.25);
-                const gain = this.ctx.createGain();
-                gain.gain.setValueAtTime(0.6, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                whiteNoise.connect(filter);
-                filter.connect(gain);
-                gain.connect(this.ctx.destination);
-                whiteNoise.start();
-                whiteNoise.stop(now + 0.25);
+                this.playTone(150, 'triangle', 0.18, 0.30, 0);
             }
             playCharge(progress) {
-                if (this.muted || !this.ctx || Math.random() > 0.25) return;
-                const now = this.ctx.currentTime;
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(180 + progress * 350, now);
-                gain.gain.setValueAtTime(0.04, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(now + 0.06);
+                if (Math.random() > 0.25) return;
+                this.playTone(220 + progress * 380, 'triangle', 0.06, 0.12);
+            }
+            playBeat(beatIndex, isPlayerTurn, isTargetBeat) {
+                if (isTargetBeat) {
+                    this.playTone(isPlayerTurn ? 1318.5 : 1046.5, 'sine', 0.12, 0.20);
+                } else {
+                    this.playTone(isPlayerTurn ? 587.33 : 493.88, 'sine', 0.06, 0.10);
+                }
+            }
+            playPerfect() {
+                [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((freq, idx) => {
+                    this.playTone(freq, 'triangle', 0.24, 0.24, idx * 0.045);
+                });
             }
         }
 
@@ -277,9 +436,18 @@
         const gestureText = document.getElementById('gestureText');
         const snowBar = document.getElementById('snowBar');
         const snowPercent = document.getElementById('snowPercent');
+        const comboCountText = document.getElementById('comboCountText');
+        const rhythmPhaseBadge = document.getElementById('rhythmPhaseBadge');
+        const rhythmTargetLabel = document.getElementById('rhythmTargetLabel');
+        const rhythmFeedbackText = document.getElementById('rhythmFeedbackText');
+        const beatDots = [
+            document.getElementById('beatDot0'),
+            document.getElementById('beatDot1'),
+            document.getElementById('beatDot2'),
+            document.getElementById('beatDot3')
+        ];
         const refrostBtn = document.getElementById('refrostBtn');
         const audioBtn = document.getElementById('audioBtn');
-        const audioIcon = document.getElementById('audioIcon');
         const permissionModal = document.getElementById('permissionModal');
         const modalDesc = document.getElementById('modalDesc');
         const startBtn = document.getElementById('startBtn');
@@ -297,7 +465,28 @@
         let snowSplats = [];
         let snowflakes = [];
 
-        // Snowman interactive state
+        // Rhythm Heaven Style Call-and-Response Engine (100 BPM = 600ms per beat)
+        const RHYTHM_CHALLENGE = {
+            id: 'HOLD_AND_THROW',
+            gesture: 'OPEN_PALM',
+            label: '1-2-3 握拳蓄力 → 第 4 拍张掌！',
+            demoIcon: '🖐️',
+            demoHint: '示范：✊ 1 - ✊ 2 - ✊ 3 - 【🖐️ 第4拍发射！】'
+        };
+
+        const rhythmState = {
+            active: false,
+            bpm: 100,
+            beatIntervalMs: 600,
+            startTime: 0,
+            lastGlobalBeat: -1,
+            holdBeatsCount: 0,
+            playerHitThisRound: false,
+            combo: 0,
+            demoPulse: 0
+        };
+
+        // Classic Cute Snowman Interactive State
         let snowman = {
             x: 0,
             y: 0,
@@ -340,6 +529,116 @@
             return REMOTE_MODEL_URL;
         }
 
+        /**
+         * Initialize Frosted Glass Layer
+         */
+        function initFrostLayer() {
+            frostMaskCtx.globalCompositeOperation = 'source-over';
+            frostMaskCtx.clearRect(0, 0, width, height);
+
+            const frostGrad = frostMaskCtx.createLinearGradient(0, 0, width, height);
+            frostGrad.addColorStop(0, 'rgba(219, 234, 254, 0.72)');
+            frostGrad.addColorStop(0.5, 'rgba(186, 230, 253, 0.65)');
+            frostGrad.addColorStop(1, 'rgba(224, 242, 254, 0.75)');
+            frostMaskCtx.fillStyle = frostGrad;
+            frostMaskCtx.fillRect(0, 0, width, height);
+
+            // Subtle ice crystal grain texture
+            frostMaskCtx.fillStyle = 'rgba(255, 255, 255, 0.14)';
+            for (let i = 0; i < 900; i++) {
+                const fx = Math.random() * width;
+                const fy = Math.random() * height;
+                const fr = 1 + Math.random() * 2.5;
+                frostMaskCtx.beginPath();
+                frostMaskCtx.arc(fx, fy, fr, 0, Math.PI * 2);
+                frostMaskCtx.fill();
+            }
+        }
+
+        /**
+         * Smooth Interpolated Wiping (clears frost without leaving white lines)
+         */
+        function wipeFrostInterpolated(fromPos, toPos) {
+            frostMaskCtx.save();
+            frostMaskCtx.globalCompositeOperation = 'destination-out';
+            frostMaskCtx.lineCap = 'round';
+            frostMaskCtx.lineJoin = 'round';
+
+            const brushRadius = 46;
+            const start = fromPos || toPos;
+            const dx = toPos.x - start.x;
+            const dy = toPos.y - start.y;
+            const dist = Math.hypot(dx, dy);
+            const steps = Math.max(1, Math.ceil(dist / 8));
+
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const ix = start.x + dx * t;
+                const iy = start.y + dy * t;
+
+                const grad = frostMaskCtx.createRadialGradient(ix, iy, brushRadius * 0.25, ix, iy, brushRadius);
+                grad.addColorStop(0, 'rgba(0, 0, 0, 1)');
+                grad.addColorStop(0.7, 'rgba(0, 0, 0, 0.7)');
+                grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+                frostMaskCtx.fillStyle = grad;
+                frostMaskCtx.beginPath();
+                frostMaskCtx.arc(ix, iy, brushRadius, 0, Math.PI * 2);
+                frostMaskCtx.fill();
+            }
+            frostMaskCtx.restore();
+        }
+
+        /**
+         * Initialize & Update Real-Time Falling Snowflakes
+         */
+        function initSnowflakes() {
+            snowflakes = [];
+            const count = Math.min(110, Math.floor((width * height) / 14000));
+            for (let i = 0; i < count; i++) {
+                snowflakes.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    r: 1.5 + Math.random() * 3.5,
+                    vy: 0.9 + Math.random() * 1.8,
+                    vx: (Math.random() - 0.5) * 0.6,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+        }
+
+        function updateSnowMeterUI() {
+            const pct = Math.round(snowAccumulation);
+            if (snowBar) snowBar.style.width = `${pct}%`;
+            if (snowPercent) snowPercent.textContent = `${pct}%`;
+        }
+
+        function updateAndDrawSnowflakes() {
+            bgCtx.save();
+            bgCtx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            for (const f of snowflakes) {
+                f.phase += 0.025;
+                f.x += f.vx + Math.sin(f.phase) * 0.45;
+                f.y += f.vy;
+
+                if (f.y > height - 20) {
+                    f.y = -8;
+                    f.x = Math.random() * width;
+                    if (snowAccumulation < 100) {
+                        snowAccumulation = Math.min(100, snowAccumulation + 0.04);
+                        updateSnowMeterUI();
+                    }
+                }
+                if (f.x < 0) f.x = width;
+                if (f.x > width) f.x = 0;
+
+                bgCtx.beginPath();
+                bgCtx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+                bgCtx.fill();
+            }
+            bgCtx.restore();
+        }
+
         function resizeCanvases() {
             let tempCanvas = null;
             if (frostMaskCanvas.width > 0 && frostMaskCanvas.height > 0) {
@@ -367,136 +666,15 @@
                 initFrostLayer();
             }
 
-            snowman.x = width * 0.8;
+            snowman.x = width * 0.78;
             snowman.y = height - 45;
         }
 
         window.addEventListener('resize', resizeCanvases);
 
         /**
-         * Initialize Frosted Glass Layer
-         */
-        function initFrostLayer() {
-            frostMaskCtx.globalCompositeOperation = 'source-over';
-            frostMaskCtx.clearRect(0, 0, width, height);
-
-            // Base semi-transparent icy mist
-            const grad = frostMaskCtx.createRadialGradient(
-                width / 2, height / 2, Math.min(width, height) * 0.15,
-                width / 2, height / 2, Math.max(width, height) * 0.75
-            );
-            grad.addColorStop(0, 'rgba(219, 240, 255, 0.52)');
-            grad.addColorStop(0.65, 'rgba(186, 224, 248, 0.72)');
-            grad.addColorStop(1, 'rgba(148, 198, 235, 0.86)');
-
-            frostMaskCtx.fillStyle = grad;
-            frostMaskCtx.fillRect(0, 0, width, height);
-
-            // Add crystalline ice grain texture
-            for (let i = 0; i < 650; i++) {
-                const fx = Math.random() * width;
-                const fy = Math.random() * height;
-                const fr = 4 + Math.random() * 24;
-                frostMaskCtx.beginPath();
-                frostMaskCtx.arc(fx, fy, fr, 0, Math.PI * 2);
-                frostMaskCtx.fillStyle = `rgba(255, 255, 255, ${0.03 + Math.random() * 0.06})`;
-                frostMaskCtx.fill();
-            }
-        }
-
-        /**
-         * Erase frost along interpolated trajectory without leaving white lines
-         */
-        function wipeFrostInterpolated(fromPos, toPos) {
-            if (!toPos) return;
-            frostMaskCtx.save();
-            frostMaskCtx.globalCompositeOperation = 'destination-out';
-
-            const brushRadius = 46;
-            const start = fromPos || toPos;
-            const dx = toPos.x - start.x;
-            const dy = toPos.y - start.y;
-            const distance = Math.hypot(dx, dy);
-            const steps = Math.max(1, Math.ceil(distance / 8));
-
-            for (let i = 0; i <= steps; i++) {
-                const t = i / steps;
-                const ix = start.x + dx * t;
-                const iy = start.y + dy * t;
-
-                const radGrad = frostMaskCtx.createRadialGradient(ix, iy, brushRadius * 0.25, ix, iy, brushRadius);
-                radGrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
-                radGrad.addColorStop(0.65, 'rgba(0, 0, 0, 0.75)');
-                radGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-                frostMaskCtx.fillStyle = radGrad;
-                frostMaskCtx.beginPath();
-                frostMaskCtx.arc(ix, iy, brushRadius, 0, Math.PI * 2);
-                frostMaskCtx.fill();
-            }
-            frostMaskCtx.restore();
-        }
-
-        /**
-         * Snowfall Particle System (Capped for 60fps smoothness)
-         */
-        function initSnowflakes() {
-            snowflakes = [];
-            const count = Math.min(110, Math.floor((width * height) / 14000));
-            for (let i = 0; i < count; i++) {
-                snowflakes.push(createSnowflake(true));
-            }
-        }
-
-        function createSnowflake(randomY = false) {
-            return {
-                x: Math.random() * width,
-                y: randomY ? Math.random() * height : -10,
-                r: 1.5 + Math.random() * 3.5,
-                speedY: 0.9 + Math.random() * 1.8,
-                driftX: (Math.random() - 0.5) * 0.6,
-                phase: Math.random() * Math.PI * 2,
-                opacity: 0.45 + Math.random() * 0.5
-            };
-        }
-
-        function updateAndDrawSnowflakes() {
-            bgCtx.save();
-            for (let i = 0; i < snowflakes.length; i++) {
-                const s = snowflakes[i];
-                s.phase += 0.02;
-                s.x += s.driftX + Math.sin(s.phase) * 0.45;
-                s.y += s.speedY;
-
-                if (s.y > height - 20) {
-                    // Accumulate snow slowly as flakes land
-                    if (snowAccumulation < 100) {
-                        snowAccumulation = Math.min(100, snowAccumulation + 0.035);
-                        updateSnowMeterUI();
-                    }
-                    snowflakes[i] = createSnowflake(false);
-                    continue;
-                }
-                if (s.x < 0) s.x = width;
-                if (s.x > width) s.x = 0;
-
-                bgCtx.beginPath();
-                bgCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                bgCtx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
-                bgCtx.fill();
-            }
-            bgCtx.restore();
-        }
-
-        function updateSnowMeterUI() {
-            const pct = Math.round(snowAccumulation);
-            snowBar.style.width = `${pct}%`;
-            snowPercent.textContent = `${pct}%`;
-        }
-
-        /**
          * Draw Ground Snow Drift & Progressive Cute Snowman
-         * Order: Stage 1 (>=25%): Hat & Face -> Stage 2 (>=55%): Body -> Stage 3 (>=85%): Scarf & Arms
+         * Order: Stage 1 (>=18%): Hat & Face -> Stage 2 (>=50%): Round Body -> Stage 3 (>=80%): Scarf & Twig Arms
          */
         function drawSnowGroundAndSnowman(now) {
             const groundHeight = 26 + (snowAccumulation / 100) * 58;
@@ -517,14 +695,14 @@
             bgCtx.fill();
             bgCtx.restore();
 
-            // Update Snowman spring wobble & blinking
+            // Update snowman spring wobble & blinking
             snowman.wobbleVel += -snowman.wobbleAngle * 0.14;
             snowman.wobbleVel *= 0.84;
             snowman.wobbleAngle += snowman.wobbleVel;
 
-            if (now - snowman.blinkTimer > 3200) {
+            if (now - snowman.blinkTimer > 3100) {
                 snowman.isBlinking = true;
-                if (now - snowman.blinkTimer > 3380) {
+                if (now - snowman.blinkTimer > 3280) {
                     snowman.isBlinking = false;
                     snowman.blinkTimer = now;
                 }
@@ -532,13 +710,13 @@
 
             // Stage growth interpolation
             const stage1Grow = Math.max(0, Math.min(1, (snowAccumulation - 18) / 15)); // Hat & Face
-            const stage2Grow = Math.max(0, Math.min(1, (snowAccumulation - 50) / 18)); // Body
-            const stage3Grow = Math.max(0, Math.min(1, (snowAccumulation - 80) / 15)); // Scarf & Arms
+            const stage2Grow = Math.max(0, Math.min(1, (snowAccumulation - 50) / 18)); // Round Body
+            const stage3Grow = Math.max(0, Math.min(1, (snowAccumulation - 80) / 15)); // Scarf & Twig Arms
 
             if (stage1Grow <= 0) return;
 
-            snowman.x = width * 0.8;
-            snowman.y = groundTopY + 6;
+            snowman.x = width * 0.78;
+            snowman.y = groundTopY - 6;
 
             bgCtx.save();
             bgCtx.translate(snowman.x, snowman.y);
@@ -546,144 +724,127 @@
 
             const bodyRadius = 56 * stage2Grow;
             const headRadius = 38 * stage1Grow;
-            const headCenterY = -bodyRadius * 1.55 - headRadius * 0.75;
+            const headCenterY = -headRadius * 0.78 - bodyRadius * 1.48;
 
-            // Stage 2: Lower Body
+            // Stage 2: Snowman Round Body
             if (stage2Grow > 0.02) {
-                bgCtx.save();
-                bgCtx.scale(stage2Grow, stage2Grow);
-                const bodyGrad = bgCtx.createRadialGradient(-14, -52, 8, 0, -48, 58);
+                const bodyCenterY = -bodyRadius * 0.78;
+                const bodyGrad = bgCtx.createRadialGradient(-12, bodyCenterY - 12, 6, 0, bodyCenterY, bodyRadius);
                 bodyGrad.addColorStop(0, '#ffffff');
                 bodyGrad.addColorStop(1, '#dbeafe');
                 bgCtx.fillStyle = bodyGrad;
                 bgCtx.beginPath();
-                bgCtx.arc(0, -48, 56, 0, Math.PI * 2);
+                bgCtx.arc(0, bodyCenterY, bodyRadius, 0, Math.PI * 2);
                 bgCtx.fill();
 
-                // Coal buttons
+                // Coal buttons on body
                 bgCtx.fillStyle = '#1e293b';
-                bgCtx.beginPath();
-                bgCtx.arc(0, -60, 4.5, 0, Math.PI * 2);
-                bgCtx.arc(0, -38, 4.5, 0, Math.PI * 2);
-                bgCtx.fill();
-                bgCtx.restore();
+                [-10, 12].forEach(dy => {
+                    bgCtx.beginPath();
+                    bgCtx.arc(0, bodyCenterY + dy * stage2Grow, 4 * stage2Grow, 0, Math.PI * 2);
+                    bgCtx.fill();
+                });
+
+                // Stage 3: Scarf & Twig Arms
+                if (stage3Grow > 0.02) {
+                    // Twig Arms
+                    bgCtx.strokeStyle = '#78350f';
+                    bgCtx.lineWidth = 4.5 * stage3Grow;
+                    bgCtx.lineCap = 'round';
+                    // Left arm
+                    bgCtx.beginPath();
+                    bgCtx.moveTo(-bodyRadius * 0.85, bodyCenterY - 8);
+                    bgCtx.lineTo(-bodyRadius - 32 * stage3Grow, bodyCenterY - 28 * stage3Grow);
+                    bgCtx.moveTo(-bodyRadius - 18 * stage3Grow, bodyCenterY - 19 * stage3Grow);
+                    bgCtx.lineTo(-bodyRadius - 24 * stage3Grow, bodyCenterY - 35 * stage3Grow);
+                    // Right arm
+                    bgCtx.moveTo(bodyRadius * 0.85, bodyCenterY - 8);
+                    bgCtx.lineTo(bodyRadius + 32 * stage3Grow, bodyCenterY - 28 * stage3Grow);
+                    bgCtx.moveTo(bodyRadius + 18 * stage3Grow, bodyCenterY - 19 * stage3Grow);
+                    bgCtx.lineTo(bodyRadius + 24 * stage3Grow, bodyCenterY - 35 * stage3Grow);
+                    bgCtx.stroke();
+
+                    // Cozy Red-Gold Striped Scarf
+                    const neckY = headCenterY + headRadius * 0.82;
+                    bgCtx.fillStyle = '#ef4444';
+                    bgCtx.beginPath();
+                    bgCtx.roundRect(-34 * stage3Grow, neckY - 6, 68 * stage3Grow, 14 * stage3Grow, 7);
+                    bgCtx.fill();
+                    // Hanging scarf tail
+                    bgCtx.beginPath();
+                    bgCtx.roundRect(12 * stage3Grow, neckY + 2, 15 * stage3Grow, 32 * stage3Grow, 6);
+                    bgCtx.fill();
+                    bgCtx.fillStyle = '#facc15';
+                    bgCtx.fillRect(12 * stage3Grow, neckY + 22 * stage3Grow, 15 * stage3Grow, 4 * stage3Grow);
+                }
             }
 
-            // Stage 3: Twig Arms & Cozy Red Scarf
-            if (stage3Grow > 0.02) {
-                bgCtx.save();
-                bgCtx.globalAlpha = stage3Grow;
-                // Left & Right Twig Arms
-                bgCtx.strokeStyle = '#78350f';
-                bgCtx.lineWidth = 4.5;
-                bgCtx.lineCap = 'round';
-                // Left arm
-                bgCtx.beginPath();
-                bgCtx.moveTo(-46, -62);
-                bgCtx.lineTo(-92, -88 - Math.sin(snowman.wobbleAngle * 4) * 10);
-                bgCtx.moveTo(-76, -78);
-                bgCtx.lineTo(-86, -96);
-                bgCtx.stroke();
-                // Right arm
-                bgCtx.beginPath();
-                bgCtx.moveTo(46, -62);
-                bgCtx.lineTo(92, -88 + Math.sin(snowman.wobbleAngle * 4) * 10);
-                bgCtx.moveTo(76, -78);
-                bgCtx.lineTo(86, -96);
-                bgCtx.stroke();
-
-                // Red Scarf around neck
-                const neckY = headCenterY + headRadius * 0.85;
-                bgCtx.fillStyle = '#ef4444';
-                bgCtx.beginPath();
-                bgCtx.roundRect(-34, neckY - 6, 68, 15, 7);
-                bgCtx.fill();
-                // Scarf hanging tail
-                bgCtx.beginPath();
-                bgCtx.roundRect(12, neckY + 4, 15, 34, 6);
-                bgCtx.fill();
-                // Gold stripes on scarf
-                bgCtx.fillStyle = '#fde047';
-                bgCtx.fillRect(12, neckY + 26, 15, 4);
-                bgCtx.restore();
-            }
-
-            // Stage 1: Head, Cute Face & Top Hat (emerges first!)
+            // Stage 1: Snowman Face & Winter Top Hat (grows first!)
             bgCtx.save();
             bgCtx.translate(0, headCenterY);
             bgCtx.rotate(snowman.headTilt * Math.sin(now * 0.008));
-            bgCtx.scale(stage1Grow, stage1Grow);
 
-            // Head sphere
-            const headGrad = bgCtx.createRadialGradient(-10, -10, 5, 0, 0, 40);
+            const headGrad = bgCtx.createRadialGradient(-10, -10, 4, 0, 0, headRadius);
             headGrad.addColorStop(0, '#ffffff');
             headGrad.addColorStop(1, '#e0f2fe');
             bgCtx.fillStyle = headGrad;
             bgCtx.beginPath();
-            bgCtx.arc(0, 0, 38, 0, Math.PI * 2);
+            bgCtx.arc(0, 0, headRadius, 0, Math.PI * 2);
             bgCtx.fill();
 
-            // Rosy cheeks
+            // Rosy Cheeks
             bgCtx.fillStyle = 'rgba(251, 113, 133, 0.45)';
             bgCtx.beginPath();
-            bgCtx.arc(-18, 6, 6.5, 0, Math.PI * 2);
-            bgCtx.arc(18, 6, 6.5, 0, Math.PI * 2);
+            bgCtx.arc(-16 * stage1Grow, 4 * stage1Grow, 6 * stage1Grow, 0, Math.PI * 2);
+            bgCtx.arc(16 * stage1Grow, 4 * stage1Grow, 6 * stage1Grow, 0, Math.PI * 2);
             bgCtx.fill();
 
-            // Eyes (Blink support)
+            // Eyes (blink support)
             bgCtx.fillStyle = '#0f172a';
             bgCtx.strokeStyle = '#0f172a';
-            bgCtx.lineWidth = 2.8;
+            bgCtx.lineWidth = 2.5;
             if (snowman.isBlinking) {
                 bgCtx.beginPath();
-                bgCtx.moveTo(-17, -6);
-                bgCtx.lineTo(-8, -6);
-                bgCtx.moveTo(8, -6);
-                bgCtx.lineTo(17, -6);
+                bgCtx.arc(-12 * stage1Grow, -6 * stage1Grow, 4.5 * stage1Grow, 0, Math.PI);
+                bgCtx.stroke();
+                bgCtx.beginPath();
+                bgCtx.arc(12 * stage1Grow, -6 * stage1Grow, 4.5 * stage1Grow, 0, Math.PI);
                 bgCtx.stroke();
             } else {
                 bgCtx.beginPath();
-                bgCtx.arc(-12.5, -6, 4.2, 0, Math.PI * 2);
-                bgCtx.arc(12.5, -6, 4.2, 0, Math.PI * 2);
-                bgCtx.fill();
-                // Eye highlights
-                bgCtx.fillStyle = '#ffffff';
-                bgCtx.beginPath();
-                bgCtx.arc(-11, -7.5, 1.5, 0, Math.PI * 2);
-                bgCtx.arc(14, -7.5, 1.5, 0, Math.PI * 2);
+                bgCtx.arc(-12 * stage1Grow, -6 * stage1Grow, 3.8 * stage1Grow, 0, Math.PI * 2);
+                bgCtx.arc(12 * stage1Grow, -6 * stage1Grow, 3.8 * stage1Grow, 0, Math.PI * 2);
                 bgCtx.fill();
             }
 
-            // Carrot nose
+            // Carrot Nose
             bgCtx.fillStyle = '#f97316';
             bgCtx.beginPath();
-            bgCtx.moveTo(0, -1);
-            bgCtx.lineTo(20, 4);
-            bgCtx.lineTo(0, 8);
+            bgCtx.moveTo(0, -1 * stage1Grow);
+            bgCtx.lineTo(-16 * stage1Grow, 4 * stage1Grow);
+            bgCtx.lineTo(0, 7 * stage1Grow);
             bgCtx.closePath();
             bgCtx.fill();
 
-            // Cute smile
-            bgCtx.strokeStyle = '#334155';
-            bgCtx.lineWidth = 2.2;
+            // Cute Smile
             bgCtx.beginPath();
-            bgCtx.arc(0, 10, 9, 0.2 * Math.PI, 0.8 * Math.PI);
+            bgCtx.arc(0, 9 * stage1Grow, 9 * stage1Grow, 0.15 * Math.PI, 0.85 * Math.PI);
             bgCtx.stroke();
 
-            // Stylish Top Hat
+            // Cute Festive Hat on top of head
             bgCtx.save();
-            bgCtx.translate(0, -34);
-            bgCtx.rotate(-0.08);
+            bgCtx.translate(4 * stage1Grow, -headRadius * 0.82);
+            bgCtx.rotate(0.16);
             bgCtx.fillStyle = '#1e293b';
             bgCtx.beginPath();
-            bgCtx.roundRect(-34, -4, 68, 9, 4);
+            bgCtx.roundRect(-28 * stage1Grow, -4 * stage1Grow, 56 * stage1Grow, 8 * stage1Grow, 4);
             bgCtx.fill();
             bgCtx.beginPath();
-            bgCtx.roundRect(-22, -32, 44, 30, 5);
+            bgCtx.roundRect(-18 * stage1Grow, -30 * stage1Grow, 36 * stage1Grow, 28 * stage1Grow, 5);
             bgCtx.fill();
-            // Hat red ribbon
+            // Red ribbon band
             bgCtx.fillStyle = '#ef4444';
-            bgCtx.fillRect(-22, -10, 44, 6);
+            bgCtx.fillRect(-18 * stage1Grow, -10 * stage1Grow, 36 * stage1Grow, 5 * stage1Grow);
             bgCtx.restore();
 
             bgCtx.restore();
@@ -694,40 +855,174 @@
         }
 
         /**
-         * Check if index finger pokes the snowman
+         * Check if index finger pokes the Snowman
          */
         function checkSnowmanPoke(fx, fy, now) {
             if (snowAccumulation < 18) return;
             const hitRadius = 85;
-            const distToSnowman = Math.hypot(fx - snowman.x, fy - (snowman.y - 55));
-            if (distToSnowman < hitRadius && now - snowman.lastPokeTime > 450) {
+            const distToHead = Math.hypot(fx - snowman.x, fy - (snowman.y - 45));
+            const distToBody = Math.hypot(fx - snowman.x, fy - (snowman.y - 10));
+            if ((distToHead < hitRadius || distToBody < hitRadius) && now - snowman.lastPokeTime > 450) {
                 snowman.lastPokeTime = now;
-                snowman.wobbleVel = (fx < snowman.x ? 1 : -1) * 0.26;
-                snowman.headTilt = (fx < snowman.x ? 1 : -1) * 0.28;
-                snowman.blinkTimer = now - 3210; // Trigger immediate blink
+                snowman.wobbleVel = (fx < snowman.x ? 1 : -1) * 0.22;
+                snowman.headTilt = (fx < snowman.x ? 1 : -1) * 0.25;
+                snowman.blinkTimer = now - 3110;
                 soundEngine.playPoke();
-                updateGesturePill('⛄ 戳中雪人啦！摇晃眨眼中~', 'fa-face-smile-beam', 'text-emerald-300');
+                updateGesturePill('⛄ 戳到小雪人啦！眨眼摇晃中~', 'fa-face-smile-beam', 'text-emerald-300');
             }
         }
 
         /**
-         * Flying Snowball Animation & Glass Impact Splat
+         * Rhythm Heaven Call-and-Response Loop (Beats 0-3: Demo, Beats 4-7: Player)
+         * Beats 1-3: Hold Fist to charge snowball -> Beat 4: Open Palm to launch!
+         */
+        function updateRhythmEngine(now) {
+            if (!rhythmState.active) return;
+            soundEngine.syncClock(now, rhythmState.startTime, rhythmState.beatIntervalMs);
+            const elapsed = now - rhythmState.startTime;
+            const globalBeat = Math.floor(elapsed / rhythmState.beatIntervalMs);
+            const cycleBeat = globalBeat % 8; // 0..3 = Demo Turn, 4..7 = Player Turn
+            const beatInMeasure = cycleBeat % 4; // 0, 1, 2 (Hold Fist), 3 (Release Palm!)
+            const isPlayerTurn = cycleBeat >= 4;
+
+            if (globalBeat !== rhythmState.lastGlobalBeat) {
+                rhythmState.lastGlobalBeat = globalBeat;
+
+                const isTargetBeat = beatInMeasure === 3;
+                soundEngine.playBeat(beatInMeasure, isPlayerTurn, isTargetBeat);
+
+                // Count how many beats player held fist during beats 1-3
+                if (isPlayerTurn && beatInMeasure < 3 && confirmedGesture === 'FIST_CHARGE') {
+                    rhythmState.holdBeatsCount++;
+                }
+
+                // Update Phase Badge & Target Label
+                if (!isPlayerTurn) {
+                    rhythmPhaseBadge.textContent = '👀 示范回合 · 看节拍';
+                    rhythmPhaseBadge.className = 'px-2.5 py-0.5 rounded-full bg-cyan-500/25 text-cyan-200 font-bold border border-cyan-400/30';
+                    rhythmTargetLabel.textContent = RHYTHM_CHALLENGE.label;
+                    if (beatInMeasure === 0) {
+                        rhythmFeedbackText.textContent = RHYTHM_CHALLENGE.demoHint;
+                        rhythmFeedbackText.className = 'text-xs font-bold tracking-wider text-cyan-200 h-4';
+                    }
+                    if (isTargetBeat) {
+                        rhythmState.demoPulse = 1.0;
+                    }
+                } else {
+                    rhythmPhaseBadge.textContent = '🎯 你的回合 · 跟拍蓄力发射';
+                    rhythmPhaseBadge.className = 'px-2.5 py-0.5 rounded-full bg-amber-500/30 text-amber-200 font-bold border border-amber-400/40';
+                    rhythmTargetLabel.textContent = '1-2-3 握拳蓄力 → 第 4 拍张开手掌！';
+                    if (beatInMeasure === 0) {
+                        rhythmState.playerHitThisRound = false;
+                        rhythmState.holdBeatsCount = 0;
+                        rhythmFeedbackText.textContent = '开始握拳蓄力：✊ 1 - ✊ 2 - ✊ 3 - 【🖐️ 第 4 拍张掌！】';
+                        rhythmFeedbackText.className = 'text-xs font-bold tracking-wider text-amber-200 h-4';
+                    }
+                }
+
+                // Update 4 beat dots visual highlight (Beats 0-2 = ✊, Beat 3 = 🖐️)
+                beatDots.forEach((dot, idx) => {
+                    if (idx === beatInMeasure) {
+                        if (idx === 3) {
+                            dot.className = isPlayerTurn
+                                ? 'w-7 h-7 rounded-full bg-amber-400 text-slate-950 scale-125 shadow-lg shadow-amber-400/70 flex items-center justify-center text-xs font-black transition-all duration-100'
+                                : 'w-7 h-7 rounded-full bg-cyan-400 text-slate-950 scale-125 shadow-lg shadow-cyan-400/70 flex items-center justify-center text-xs font-black transition-all duration-100';
+                        } else {
+                            dot.className = isPlayerTurn
+                                ? 'w-6 h-6 rounded-full bg-amber-300/90 text-slate-950 scale-115 shadow-md shadow-amber-300/50 flex items-center justify-center text-[11px] font-bold transition-all duration-100'
+                                : 'w-6 h-6 rounded-full bg-cyan-300/90 text-slate-950 scale-115 shadow-md shadow-cyan-300/50 flex items-center justify-center text-[11px] font-bold transition-all duration-100';
+                        }
+                    } else {
+                        dot.className = idx === 3
+                            ? 'w-6 h-6 rounded-full bg-amber-400/20 border-2 border-amber-300/50 flex items-center justify-center text-xs font-bold text-amber-200 transition-all duration-100'
+                            : 'w-5 h-5 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-[10px] font-bold text-white/70 transition-all duration-100';
+                    }
+                });
+            }
+
+            // Render Holographic Demo Ghost Cue in Center during Demo Turn (1-3: growing fist, 4: open palm release!)
+            if (!isPlayerTurn || rhythmState.demoPulse > 0.05) {
+                const beatProgress = (elapsed % rhythmState.beatIntervalMs) / rhythmState.beatIntervalMs;
+                const isReleaseBeat = beatInMeasure === 3;
+                const holdScale = 0.85 + beatInMeasure * 0.14 + Math.sin(beatProgress * Math.PI) * 0.06;
+                const scale = isReleaseBeat ? 1.32 - beatProgress * 0.22 : holdScale;
+                const ghostIcon = isReleaseBeat ? '🖐️' : '✊';
+
+                uiCtx.save();
+                uiCtx.translate(width / 2, height * 0.46);
+                uiCtx.scale(scale, scale);
+
+                // Glowing rhythm ring
+                uiCtx.beginPath();
+                uiCtx.arc(0, 0, 56, 0, Math.PI * 2);
+                uiCtx.fillStyle = isReleaseBeat ? 'rgba(251, 191, 36, 0.25)' : 'rgba(56, 189, 248, 0.16)';
+                uiCtx.fill();
+                uiCtx.lineWidth = isReleaseBeat ? 3.5 : 2.5;
+                uiCtx.strokeStyle = isReleaseBeat ? 'rgba(253, 224, 71, 0.9)' : 'rgba(125, 211, 252, 0.55)';
+                uiCtx.stroke();
+
+                uiCtx.font = '42px sans-serif';
+                uiCtx.textAlign = 'center';
+                uiCtx.textBaseline = 'middle';
+                uiCtx.fillText(ghostIcon, 0, 2);
+                uiCtx.restore();
+
+                rhythmState.demoPulse *= 0.88;
+            }
+        }
+
+        /**
+         * Evaluate if player releases open palm on the 4th beat after charging in beats 1-3
+         */
+        function checkRhythmBeatHit(detectedGesture) {
+            if (!rhythmState.active || rhythmState.playerHitThisRound || detectedGesture !== 'OPEN_PALM') return false;
+            const now = performance.now();
+            const elapsed = now - rhythmState.startTime;
+            const cycleMs = rhythmState.beatIntervalMs * 8;
+            const posInCycle = elapsed % cycleMs;
+            // Target moment is Beat 7 (4th beat of player's turn = 7 * beatIntervalMs)
+            const targetTime = rhythmState.beatIntervalMs * 7;
+            const delta = Math.abs(posInCycle - targetTime);
+
+            if (delta <= 320) {
+                rhythmState.playerHitThisRound = true;
+                rhythmState.combo++;
+                if (comboCountText) comboCountText.textContent = rhythmState.combo;
+
+                const isPerfect = delta <= 165;
+                rhythmFeedbackText.textContent = isPerfect
+                    ? `✨ PERFECT! 第 4 拍完美释放 (Combo x${rhythmState.combo})`
+                    : `👍 GOOD! 节拍命中 (Combo x${rhythmState.combo})`;
+                rhythmFeedbackText.className = isPerfect
+                    ? 'text-xs font-black tracking-wider text-amber-300 h-4'
+                    : 'text-xs font-bold tracking-wider text-emerald-300 h-4';
+
+                soundEngine.playPerfect();
+                snowAccumulation = Math.min(100, snowAccumulation + 6);
+                updateSnowMeterUI();
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Flying Snowball Animation (towards glass screen)
          */
         function updateAndDrawFlyingSnowballs() {
             for (let i = flyingSnowballs.length - 1; i >= 0; i--) {
                 const b = flyingSnowballs[i];
                 b.progress += 0.085;
                 if (b.progress >= 1) {
-                    createSnowSplat(b.endX, b.endY, b.radius * 1.65);
+                    createSnowSplat(b.endX, b.endY, b.radius * 1.75);
                     soundEngine.playSplat();
                     flyingSnowballs.splice(i, 1);
                     continue;
                 }
 
                 const curX = b.startX + (b.endX - b.startX) * b.progress;
-                const arcY = Math.sin(b.progress * Math.PI) * -55;
+                const arcY = Math.sin(b.progress * Math.PI) * -65;
                 const curY = b.startY + (b.endY - b.startY) * b.progress + arcY;
-                const curR = b.radius * (0.7 + b.progress * 0.9);
+                const curR = b.radius * (0.65 + b.progress * 0.95);
 
                 const grad = uiCtx.createRadialGradient(curX - curR * 0.25, curY - curR * 0.25, 2, curX, curY, curR);
                 grad.addColorStop(0, '#ffffff');
@@ -947,14 +1242,20 @@
             const effectiveCharge = Math.max(chargeProgress, (now - lastChargedTime <= 450) ? savedCharge : 0);
 
             if ((mode === 'OPEN_PALM' || latestRaw === 'OPEN_PALM') && effectiveCharge >= 0.2) {
-                launchSnowball(effectiveCharge);
+                const hitOnBeat = checkRhythmBeatHit('OPEN_PALM');
+                launchSnowball(hitOnBeat ? 1.0 : effectiveCharge);
                 confirmedGesture = 'THROW';
                 chargeProgress = 0;
                 savedCharge = 0;
                 lastChargedTime = 0;
                 gestureHistory = ['THROW'];
-                updateGesturePill('🖐️ 发射雪球!', 'fa-paper-plane', 'text-sky-300');
+                updateGesturePill(hitOnBeat ? '🎵 完美卡拍！发射超级雪球!' : '🖐️ 发射雪球!', 'fa-paper-plane', 'text-sky-300');
                 return;
+            }
+
+            // Also check rhythm timing for Fist Charge or Index Wipe challenges
+            if (mode === 'FIST_CHARGE' || mode === 'INDEX_WIPE') {
+                checkRhythmBeatHit(mode);
             }
 
             // Clear expired charge if user switched to another non-throw gesture
@@ -985,19 +1286,18 @@
         }
 
         /**
-         * Launch a snowball toward the glass screen
+         * Launch a snowball toward the frosted glass screen
          */
         function launchSnowball(power = 0.5) {
             if (!smoothedLandmarks) return;
             const handCenter = smoothedLandmarks[9];
-
             flyingSnowballs.push({
                 startX: handCenter.x,
                 startY: handCenter.y,
-                endX: width / 2 + (Math.random() - 0.5) * 200,
-                endY: height / 2 + (Math.random() - 0.5) * 150,
+                endX: width / 2 + (Math.random() - 0.5) * (width * 0.45),
+                endY: height / 2 + (Math.random() - 0.5) * (height * 0.38),
                 progress: 0,
-                radius: 22 + power * 18
+                radius: 24 + power * 20
             });
         }
 
@@ -1179,6 +1479,7 @@
 
             // 3. UI Overlay, Hand Landmarks, Wipe & Throw FX
             uiCtx.clearRect(0, 0, width, height);
+            updateRhythmEngine(now);
             updateAndDrawFlyingSnowballs();
 
             if (smoothedLandmarks) {
@@ -1228,10 +1529,12 @@
          * UI Button Event Listeners
          */
         startBtn.addEventListener('click', async () => {
+            // 1. Trigger pure Web Audio BGM immediately in synchronous click handler
+            soundEngine.startBgm();
+
             startBtn.disabled = true;
             startBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 正在连接摄像头...';
 
-            // 0. Check if embedded inside a restricted sandbox iframe (e.g., Google Sites)
             if (window.self !== window.top) {
                 try {
                     if (document.featurePolicy && !document.featurePolicy.allowsFeature('camera')) {
@@ -1240,7 +1543,6 @@
                 } catch (_) {}
             }
 
-            // 1. Check secure context & camera API availability
             if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 modalDesc.innerHTML = `<span class="text-rose-400 font-semibold">浏览器安全限制拦截了摄像头：</span>当前页面未使用 <b>HTTPS</b> 协议访问，或被嵌入在未授权摄像头的沙盒容器（如 Google Sites）中。请独立部署至 Vercel / Netlify / GitHub Pages 后直接打开。`;
                 startBtn.disabled = false;
@@ -1249,13 +1551,13 @@
             }
 
             try {
-                soundEngine.init();
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
                     audio: false
                 });
                 video.srcObject = stream;
                 await video.play();
+                soundEngine.reinitAfterCamera();
             } catch (camErr) {
                 console.error('Camera access failed:', camErr);
                 const isIframe = window.self !== window.top;
@@ -1267,14 +1569,17 @@
                 return;
             }
 
-            // 2. Load MediaPipe HandLandmarker model
             startBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 正在加载手势识别模型...';
+
             try {
                 await initHandLandmarker();
                 permissionModal.classList.add('hidden');
+                rhythmState.active = true;
+                rhythmState.startTime = performance.now();
+                soundEngine.startBgm();
             } catch (modelErr) {
-                console.error('Model load failed:', modelErr);
-                modalDesc.innerHTML = `<span class="text-rose-400 font-semibold">AI 手势模型加载失败：</span>当前网络无法访问外网模型 CDN（<code>storage.googleapis.com</code>）。建议将 <code>hand_landmarker.task</code> 下载并部署到与本网页相同的服务器目录下。`;
+                console.error('Model loading failed:', modelErr);
+                modalDesc.innerHTML = `<span class="text-rose-400 font-semibold">AI 手势模型加载失败：</span>当前网络无法访问外网 CDN 资源，请将 <code>hand_landmarker.task</code> 模型文件下载后放置于与本 HTML 同级的目录中再试。`;
                 startBtn.disabled = false;
                 startBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> 重新加载模型';
             }
@@ -1287,9 +1592,11 @@
         });
 
         audioBtn.addEventListener('click', () => {
-            soundEngine.init();
-            const muted = soundEngine.toggleMute();
-            audioIcon.className = muted ? 'fa-solid fa-volume-xmark text-slate-400' : 'fa-solid fa-volume-high text-cyan-300';
+            soundEngine.toggleMute();
+            if (!rhythmState.active) {
+                rhythmState.active = true;
+                rhythmState.startTime = performance.now();
+            }
         });
 
         // Kick off animation loop on load
